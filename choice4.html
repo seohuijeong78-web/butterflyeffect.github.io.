@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>선택 4: 만남</title>
+    <style>
+        @font-face {
+            font-family: 'Didot LT Std';
+            src: url('DidotLTStd-Roman.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: url('https://res.cloudinary.com/dshryrukz/image/upload/c_scale,w_64,h_64/v1765643690/%EB%A7%88%EC%9A%B0%EC%8A%A4_%EC%BB%A4%EC%84%9C%E3%85%A1%E3%85%A1_vh2ug3.png') 32 32, auto !important;
+        }
+        
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            background: #0a0a0f;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        /* 누적 나비 컨테이너 */
+        .accumulated-butterfly-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            z-index: 2;
+            pointer-events: none;
+            animation: ribbonFly 45s ease-in-out infinite;
+        }
+        
+        .accumulated-butterfly-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        /* 리본 애니메이션 */
+        @keyframes ribbonFly {
+            0% { transform: translate(-50%, -50%) translateX(150px) translateY(200px); }
+            12.5% { transform: translate(-50%, -50%) translateX(280px) translateY(240px); }
+            25% { transform: translate(-50%, -50%) translateX(300px) translateY(290px); }
+            37.5% { transform: translate(-50%, -50%) translateX(180px) translateY(330px); }
+            50% { transform: translate(-50%, -50%) translateX(0px) translateY(350px); }
+            62.5% { transform: translate(-50%, -50%) translateX(-180px) translateY(330px); }
+            75% { transform: translate(-50%, -50%) translateX(-300px) translateY(290px); }
+            87.5% { transform: translate(-50%, -50%) translateX(-280px) translateY(240px); }
+            93.75% { transform: translate(-50%, -50%) translateX(-100px) translateY(200px); }
+            100% { transform: translate(-50%, -50%) translateX(150px) translateY(200px); }
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            transform: scale(0.8) translateY(-50px);
+        }
+        
+        /* 배경 */
+        .butterfly-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 30% 50%, rgba(147, 197, 253, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(253, 186, 116, 0.2) 0%, transparent 50%);
+            filter: blur(120px);
+            z-index: 0;
+        }
+        
+        .screen-content {
+            padding: 25px 40px 100px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* 타이틀 */
+        .center-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .main-title {
+            font-size: 64px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.95);
+            letter-spacing: 3px;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            font-family: 'Didot LT Std', 'Didot', 'Times New Roman', serif; font-weight: normal;
+        }
+        
+        .divider-line {
+            width: 250px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+            margin: 0 auto 25px;
+        }
+        
+        .subtitle {
+            font-size: 20px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 2;
+            letter-spacing: 2px;
+        }
+        
+        .timer {
+            font-size: 28px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            margin-bottom: 12px;
+            letter-spacing: 2px;
+        }
+        
+        .timer.warning {
+            color: rgba(248, 113, 113, 1);
+            animation: pulse 0.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        /* Canvas 영역 */
+        .encounter-container {
+            width: 100%;
+            max-width: 800px;
+            height: 320px;
+            position: relative;
+            background: rgba(20, 20, 30, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 auto 12px;
+            cursor: none;
+        }
+        
+        #encounterCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .instruction {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .status-text {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            margin-bottom: 15px;
+            letter-spacing: 1.5px;
+            min-height: 22px;
+        }
+        
+        .encounter-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 800px;
+            padding: 0 80px;
+            margin: 0 auto;
+        }
+        
+        .label-left,
+        .label-right {
+            font-size: 18px;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+        }
+        
+        .label-left {
+            color: rgba(147, 197, 253, 0.7);
+        }
+        
+        .label-right {
+            color: rgba(253, 186, 116, 0.7);
+        }
+        
+        .label-left.active {
+            color: rgba(147, 197, 253, 1);
+            text-shadow: 0 0 15px rgba(147, 197, 253, 0.8);
+            font-size: 20px;
+        }
+        
+        .label-right.active {
+            color: rgba(253, 186, 116, 1);
+            text-shadow: 0 0 15px rgba(253, 186, 116, 0.8);
+            font-size: 20px;
+        }
+        
+        @keyframes blink {
+            0%, 100% {
+                opacity: 1;
+                text-shadow: 0 0 20px rgba(253, 186, 116, 0.9);
+            }
+            50% {
+                opacity: 0.4;
+                text-shadow: 0 0 5px rgba(253, 186, 116, 0.3);
+            }
+        }
+        
+        /* 뒤로가기 방지 팝업 */
+        .back-prevention-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .back-prevention-modal.show {
+            display: flex;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .modal-content {
+            background: rgba(230, 230, 230, 0.75);
+            padding: 40px 50px;
+            border-radius: 6px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 18px;
+            color: #333;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            line-height: 1;
+        }
+        
+        .modal-text {
+            font-size: 18px;
+            color: #333;
+            letter-spacing: 1px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <!-- 뒤로가기 방지 팝업 -->
+    <div class="back-prevention-modal" id="backModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeModal">X</button>
+            <p class="modal-text">선택은 되돌릴 수 없습니다.</p>
+        </div>
+    </div>
+    
+    <!-- 배경음악 -->
+    <audio id="bgMusic" loop autoplay>
+        <source src="meditation-loop-30s.mp3" type="audio/mpeg">
+    </audio>
+    
+    <div class="butterfly-bg"></div>
+    
+    
+    <!-- choice1,2,3 누적 나비 -->
+    <div class="accumulated-butterfly-container" id="accumulatedButterfly">
+        <video id="accumulatedButterflyVideo" muted loop playsinline preload="auto">
+            <source src="https://res.cloudinary.com/dshryrukz/video/upload/v1765638063/Re_ribbon_butterfly_lotqdi.webm" type="video/webm">
+        </video>
+    </div>
+    
+    <div class="container">
+        <div class="screen-content">
+            <div class="center-title">
+                <h1 class="main-title">WITH WHOM</h1>
+                <div class="divider-line"></div>
+                <p class="subtitle">
+                    함께 갈까요, 홀로 갈까요?
+                </p>
+            </div>
+            
+            <div class="timer" id="timer">30</div>
+            
+            <div class="encounter-container" id="encounterContainer">
+                <canvas id="encounterCanvas"></canvas>
+            </div>
+            
+            <p class="instruction">함께 간다면 마우스로 나비를 조종해서 시간 안에 다른 나비들을 빛으로 감싸보세요</p>
+            <p class="instruction" style="margin-top: 10px;">홀로 가신다면 혼자 버튼을 눌러주세요</p>
+            
+            <div class="status-text" id="statusText"></div>
+            
+            <div class="encounter-labels">
+                <div class="label-left" id="labelTogether">함께</div>
+                <div class="label-right" id="labelAlone" style="cursor: pointer; animation: blink 1.5s ease-in-out infinite;">혼자</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 뒤로가기 방지 강화
+        (function() {
+            history.pushState(null, null, location.href);
+            
+            window.addEventListener('popstate', function(event) {
+                history.pushState(null, null, location.href);
+                document.getElementById('backModal').classList.add('show');
+            });
+            
+            window.addEventListener('load', function() {
+                window.history.pushState(null, "", window.location.href);
+                window.onpopstate = function() {
+                    window.history.pushState(null, "", window.location.href);
+                    document.getElementById('backModal').classList.add('show');
+                };
+            });
+        })();
+        
+        document.getElementById('closeModal').addEventListener('click', function() {
+        
+        // 배경음악 재생
+        const bgMusic = document.getElementById('bgMusic');
+        bgMusic.volume = 0.6;
+        bgMusic.play().catch(err => console.log('Music play failed:', err));
+        
+            document.getElementById('backModal').classList.remove('show');
+        });
+        
+        // ========== 누적 나비 효과 적용 ==========
+        const accumulatedVideo = document.getElementById('accumulatedButterflyVideo');
+        const accumulatedContainer = document.getElementById('accumulatedButterfly');
+        
+        window.addEventListener('DOMContentLoaded', function() {
+            // choice2 - 찢어진 나비 적용
+            const tornButterflyUrl = localStorage.getItem('butterfly_video');
+            if (tornButterflyUrl) {
+                const source = accumulatedVideo.querySelector('source');
+                source.src = tornButterflyUrl;
+                accumulatedVideo.load();
+                console.log('찢어진 나비 적용');
+            }
+            
+            // 비디오 재생
+            accumulatedVideo.play();
+            
+            // choice1 색상 + choice3 테두리 적용
+            const wingColor = localStorage.getItem('wing_color');
+            const borderColor = localStorage.getItem('border_color');
+            
+            let filters = 'grayscale(1) brightness(1.2) contrast(1.2)';
+            
+            if (wingColor) {
+                filters += ` drop-shadow(0 0 15px ${wingColor})`;
+                filters += ` drop-shadow(0 0 25px ${wingColor})`;
+                console.log('나비 색상:', wingColor);
+            }
+            
+            if (borderColor) {
+                filters += ` drop-shadow(0 0 10px ${borderColor})`;
+                filters += ` drop-shadow(0 0 15px ${borderColor})`;
+                console.log('테두리 색상:', borderColor);
+            }
+            
+            accumulatedVideo.style.filter = filters;
+            
+            // choice2 - 소리 선택 시 파티클
+            const soundParticles = localStorage.getItem('sound_particles');
+            if (soundParticles === 'true') {
+                createAccumulatedParticles();
+            }
+        });
+        
+        // 흰색 글로우 파티클 효과
+        function createAccumulatedParticles() {
+            const container = document.getElementById('accumulatedButterfly');
+            const particleContainer = document.createElement('div');
+            particleContainer.style.cssText = `
+                position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+                pointer-events: none; z-index: 10;
+            `;
+            container.appendChild(particleContainer);
+            
+            function spawnParticle() {
+                const particle = document.createElement('div');
+                const size = Math.random() * 3 + 2;
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 80 + 20;
+                const startX = Math.cos(angle) * distance;
+                const startY = Math.sin(angle) * distance;
+                const moveX = (Math.random() - 0.5) * 20;
+                const moveY = (Math.random() - 0.5) * 20;
+                
+                particle.style.cssText = `
+                    position: absolute;
+                    left: calc(50% + ${startX}px); top: calc(50% + ${startY}px);
+                    width: ${size}px; height: ${size}px;
+                    background: rgba(255, 255, 255, 1); border-radius: 50%;
+                    box-shadow: 0 0 8px rgba(255, 255, 255, 1), 0 0 12px rgba(255, 255, 255, 0.8);
+                    opacity: 0; animation: particleFloat 2.5s ease-in-out forwards;
+                    --move-x: ${moveX}px; --move-y: ${moveY}px;
+                `;
+                particleContainer.appendChild(particle);
+                setTimeout(() => particle.remove(), 2500);
+            }
+            
+            if (!document.getElementById('particle-style')) {
+                const style = document.createElement('style');
+                style.id = 'particle-style';
+                style.textContent = `
+                    @keyframes particleFloat {
+                        0% { opacity: 0; transform: translate(0, 0) scale(0.3); }
+                        30% { opacity: 1; }
+                        70% { opacity: 0.9; }
+                        100% { opacity: 0; transform: translate(var(--move-x), var(--move-y)) scale(1); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            setInterval(spawnParticle, 300);
+        }
+        
+        // ========== Canvas 코드 ==========
+        const canvas = document.getElementById('encounterCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.querySelector('.encounter-container');
+        const timerEl = document.getElementById('timer');
+        const statusEl = document.getElementById('statusText');
+        const labelTogether = document.getElementById('labelTogether');
+        const labelAlone = document.getElementById('labelAlone');
+
+        function resizeCanvas() {
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        let mouseX = canvas.width / 2;
+        let mouseY = canvas.height / 2;
+        let trail = [];
+        let captureParticles = []; // 잡힌 나비용 파티클
+        let butterflies = [];
+        let captured = 0;
+        let timeLeft = 20;
+        let gameActive = true;
+
+        container.addEventListener('mousemove', (e) => {
+            const rect = container.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+        });
+
+        // 타이머
+        const timerInterval = setInterval(() => {
+            if (!gameActive) return;
+            
+            timeLeft--;
+            timerEl.textContent = timeLeft;
+            
+            if (timeLeft <= 5) {
+                timerEl.classList.add('warning');
+            }
+            
+            if (timeLeft <= 0) {
+                gameActive = false;
+                clearInterval(timerInterval);
+                endGame(false);
+            }
+        }, 1000);
+
+        // 혼자 라벨 클릭 이벤트
+        labelAlone.addEventListener('click', () => {
+            gameActive = false;
+            clearInterval(timerInterval);
+            endGame(false);
+        });
+
+        function endGame(together) {
+            gameActive = false;
+            statusEl.textContent = '';
+            
+            if (together) {
+                // 함께 선택
+                localStorage.setItem('choice4', 'together');
+                labelTogether.classList.add('active');
+                labelAlone.classList.remove('active');
+            } else {
+                // 혼자 선택
+                localStorage.setItem('choice4', 'alone');
+                labelAlone.classList.add('active');
+                labelTogether.classList.remove('active');
+            }
+            
+            // ending 페이지로 이동
+            setTimeout(() => {
+                window.location.href = 'ending.html';
+            }, 1500);
+        }
+
+        class TrailParticle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.life = 1;
+                this.size = Math.random() * 4 + 3;
+                this.hue = 200 + Math.random() * 40;
+            }
+
+            update() {
+                this.life *= 0.97;
+            }
+
+            draw() {
+                const alpha = this.life * 0.6;
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 2);
+                gradient.addColorStop(0, `hsla(${this.hue}, 80%, 70%, ${alpha})`);
+                gradient.addColorStop(0.5, `hsla(${this.hue}, 70%, 60%, ${alpha * 0.5})`);
+                gradient.addColorStop(1, `hsla(${this.hue}, 60%, 50%, 0)`);
+                
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * 2, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+            }
+        }
+
+        // 잡힌 나비를 둘러싸는 눈송이 파티클
+        class CaptureParticle {
+            constructor(centerX, centerY, color) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 60 + 20; // 나비 주변 20-80px 범위
+                this.x = centerX + Math.cos(angle) * distance;
+                this.y = centerY + Math.sin(angle) * distance;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = Math.random() * 1 + 0.5; // 아래로 떨어짐
+                this.life = 1;
+                this.size = Math.random() * 1.5 + 1; // 크기 줄임: 3+2 -> 1.5+1
+                this.centerX = centerX;
+                this.centerY = centerY;
+                this.color = color; // 나비 색상
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life *= 0.985;
+            }
+
+            draw() {
+                const alpha = this.life * 0.8;
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 2.5);
+                gradient.addColorStop(0, `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${alpha})`);
+                gradient.addColorStop(0.5, `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${alpha * 0.5})`);
+                gradient.addColorStop(1, `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, 0)`);
+                
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * 2.5, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                
+                // 중심에 밝은 점
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * 0.6, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${this.color.r + 50}, ${this.color.g + 50}, ${this.color.b + 50}, ${alpha})`;
+                ctx.fill();
+            }
+        }
+
+        class Butterfly {
+            constructor(patternType, video1, video2) {
+                this.video1 = video1;
+                this.video2 = video2;
+                this.currentVideo = video1;
+                this.nextVideo = video2;
+                this.patternType = patternType;
+                this.time = 0;
+                this.baseSpeed = 0.005 + Math.random() * 0.003;
+                this.size = 100;
+                this.captured = false;
+                this.captureProgress = 0;
+                
+                // 각 나비마다 다른 색상 필터 (hue-rotate)
+                this.colorFilters = [
+                    { hue: 0, saturate: 1.2, brightness: 1.1 },      // 나비 1: 원래 색상 (약간 밝게)
+                    { hue: 180, saturate: 1.5, brightness: 1.0 },    // 나비 2: 청록색
+                    { hue: 280, saturate: 1.3, brightness: 1.1 }     // 나비 3: 보라/분홍색
+                ];
+                this.filter = this.colorFilters[patternType];
+                
+                // 각 나비마다 파티클 색상
+                this.particleColors = [
+                    { r: 253, g: 186, b: 116 },  // 나비 1: 노란색/주황색
+                    { r: 147, g: 197, b: 253 },  // 나비 2: 파란색
+                    { r: 253, g: 147, b: 197 }   // 나비 3: 분홍색
+                ];
+                this.particleColor = this.particleColors[patternType];
+                
+                // 각 나비마다 다른 시작 위치
+                const startPositions = [
+                    { x: canvas.width * 0.2, y: canvas.height * 0.3 },
+                    { x: canvas.width * 0.7, y: canvas.height * 0.5 },
+                    { x: canvas.width * 0.5, y: canvas.height * 0.7 }
+                ];
+                this.startPos = startPositions[patternType];
+                this.x = this.startPos.x;
+                this.y = this.startPos.y;
+                
+                // seamless loop를 위한 비디오 전환 설정
+                this.setupSeamlessLoop();
+            }
+            
+            setupSeamlessLoop() {
+                // 비디오가 끝나기 0.5초 전에 다음 비디오 재생 시작 (더 길게 겹침)
+                const switchBeforeEnd = 0.5;
+                
+                const handleTimeUpdate1 = () => {
+                    if (this.video1.currentTime >= this.video1.duration - switchBeforeEnd) {
+                        this.nextVideo = this.video2;
+                        this.video2.currentTime = 0;
+                        this.video2.play();
+                    }
+                };
+                
+                const handleTimeUpdate2 = () => {
+                    if (this.video2.currentTime >= this.video2.duration - switchBeforeEnd) {
+                        this.nextVideo = this.video1;
+                        this.video1.currentTime = 0;
+                        this.video1.play();
+                    }
+                };
+                
+                const handleEnded1 = () => {
+                    this.currentVideo = this.video2;
+                };
+                
+                const handleEnded2 = () => {
+                    this.currentVideo = this.video1;
+                };
+                
+                this.video1.addEventListener('timeupdate', handleTimeUpdate1);
+                this.video2.addEventListener('timeupdate', handleTimeUpdate2);
+                this.video1.addEventListener('ended', handleEnded1);
+                this.video2.addEventListener('ended', handleEnded2);
+            }
+
+            update() {
+                if (this.captured) return;
+
+                this.time += this.baseSpeed;
+
+                // 각 나비마다 완전히 다른 움직임 패턴
+                if (this.patternType === 0) {
+                    // 부드러운 S자 곡선 패턴 (좌우로 천천히, 넓은 범위)
+                    this.x = this.startPos.x + Math.sin(this.time * 1.5) * 220; // 160 -> 220
+                    this.y = this.startPos.y + Math.sin(this.time * 0.75) * 110 + Math.cos(this.time * 2) * 40; // 80 -> 110, 30 -> 40
+                } else if (this.patternType === 1) {
+                    // 나선형 패턴 (점점 커졌다 작아지는 원)
+                    const spiralRadius = 100 + Math.sin(this.time * 0.8) * 60;
+                    this.x = this.startPos.x + Math.cos(this.time * 2.5) * spiralRadius;
+                    this.y = this.startPos.y + Math.sin(this.time * 2.5) * spiralRadius;
+                } else {
+                    // 불규칙한 웨이브 패턴
+                    this.x = this.startPos.x + Math.sin(this.time * 2) * 140 + Math.cos(this.time * 5) * 40;
+                    this.y = this.startPos.y + Math.sin(this.time * 3) * 100 + Math.sin(this.time * 7) * 30;
+                }
+
+                // 경계 체크
+                this.x = Math.max(60, Math.min(canvas.width - 60, this.x));
+                this.y = Math.max(60, Math.min(canvas.height - 60, this.y));
+
+                // 빛 트레일과 충돌 체크
+                let touchingTrail = false;
+                trail.forEach(particle => {
+                    const dx = this.x - particle.x;
+                    const dy = this.y - particle.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < 50 && particle.life > 0.5) {
+                        touchingTrail = true;
+                    }
+                });
+
+                if (touchingTrail) {
+                    this.captureProgress += 2;
+                } else {
+                    this.captureProgress = Math.max(0, this.captureProgress - 0.3);
+                }
+
+                if (this.captureProgress > 80 && !this.captured) {
+                    this.captured = true;
+                    captured++;
+                    statusEl.textContent = `${captured}/3`;
+                    
+                    if (captured >= 3) {
+                        gameActive = false;
+                        clearInterval(timerInterval);
+                        setTimeout(() => {
+                            endGame(true);
+                        }, 500);
+                    }
+                }
+            }
+
+            draw() {
+                ctx.save();
+
+                // 잡혔을 때 눈송이 파티클 생성 (색상별로)
+                if (this.captured && Math.random() > 0.7) {
+                    captureParticles.push(new CaptureParticle(this.x, this.y, this.particleColor));
+                }
+
+                // 현재 재생 중인 비디오 그리기 with 색상 필터
+                ctx.translate(this.x, this.y);
+                
+                // 색상 필터 적용
+                ctx.filter = `hue-rotate(${this.filter.hue}deg) saturate(${this.filter.saturate}) brightness(${this.filter.brightness})`;
+                ctx.drawImage(this.currentVideo, -this.size / 2, -this.size / 2, this.size, this.size);
+                ctx.filter = 'none'; // 필터 초기화
+
+                ctx.restore();
+
+                // 감싸기 진행도 표시 (투명도 낮춤)
+                if (!this.captured && this.captureProgress > 0) {
+                    const progress = Math.min(this.captureProgress / 80, 1);
+                    
+                    // 배경 원 (투명도 낮춤: 0.3 -> 0.15)
+                    ctx.strokeStyle = `rgba(147, 197, 253, 0.15)`;
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 50, 0, Math.PI * 2);
+                    ctx.stroke();
+                    
+                    // 진행도 원 (투명도 낮춤: 0.6~1.0 -> 0.3~0.5)
+                    ctx.strokeStyle = `rgba(147, 197, 253, ${0.3 + progress * 0.2})`;
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 50, -Math.PI / 2, -Math.PI / 2 + progress * Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // WebM 비디오 seamless loop를 위해 각 나비마다 2개씩 생성
+        const butterflyVideos = [];
+        const videoURL = 'https://res.cloudinary.com/dshryrukz/video/upload/v1765638063/Re_ribbon_butterfly_lotqdi.webm';
+        
+        // 즉시 나비 생성 - 비디오 로딩을 기다리지 않음
+        for (let j = 0; j < 3; j++) {
+            const video1 = document.createElement('video');
+            video1.src = videoURL;
+            video1.muted = true;
+            video1.playsInline = true;
+            video1.preload = 'auto';
+            video1.loop = true;
+            video1.load();
+            video1.play().catch(err => console.log('Video1 play failed:', err));
+            
+            const video2 = document.createElement('video');
+            video2.src = videoURL;
+            video2.muted = true;
+            video2.playsInline = true;
+            video2.preload = 'auto';
+            video2.loop = true;
+            video2.load();
+            
+            butterflies.push(new Butterfly(j, video1, video2));
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(20, 20, 30, 0.2)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (gameActive) {
+                // 더 많은 트레일 생성
+                trail.push(new TrailParticle(mouseX, mouseY));
+                if (Math.random() > 0.5) {
+                    trail.push(new TrailParticle(
+                        mouseX + (Math.random() - 0.5) * 10,
+                        mouseY + (Math.random() - 0.5) * 10
+                    ));
+                }
+            }
+
+            trail = trail.filter(p => p.life > 0.01);
+            trail.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            // 잡힌 나비 파티클 업데이트 및 그리기
+            captureParticles = captureParticles.filter(p => p.life > 0.01);
+            captureParticles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            butterflies.forEach(b => {
+                b.update();
+                b.draw();
+            });
+
+            const cursorSize = 8;
+            const gradient = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, cursorSize * 2);
+            gradient.addColorStop(0, 'rgba(200, 220, 255, 0.8)');
+            gradient.addColorStop(0.5, 'rgba(150, 180, 255, 0.4)');
+            gradient.addColorStop(1, 'rgba(100, 150, 255, 0)');
+            
+            ctx.beginPath();
+            ctx.arc(mouseX, mouseY, cursorSize * 2, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(mouseX, mouseY, cursorSize, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fill();
+
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+
+<script>
+// 누적 나비를 페이지 로드 즉시 표시
+const accumulatedVideo = document.getElementById('accumulatedButterflyVideo');
+const accumulatedButterflyUrl = localStorage.getItem('butterfly_video');
+const defaultVideo = 'https://res.cloudinary.com/dshryrukz/video/upload/v1765638063/Re_ribbon_butterfly_lotqdi.webm';
+
+// 즉시 src 설정 및 재생
+if (accumulatedButterflyUrl) {
+    accumulatedVideo.src = accumulatedButterflyUrl;
+} else {
+    accumulatedVideo.src = defaultVideo;
+}
+
+// 비디오 크기 설정
+accumulatedVideo.style.width = '300px';
+accumulatedVideo.style.height = '300px';
+
+// 비디오 로드 및 재생
+accumulatedVideo.load();
+accumulatedVideo.play().catch(err => {
+    console.log('Video autoplay prevented:', err);
+    // 사용자 인터랙션 후 재생 시도
+    document.addEventListener('click', () => {
+        accumulatedVideo.play();
+    }, { once: true });
+});
+
+// choice1에서 설정한 wing_color 적용
+const wingColor = localStorage.getItem('wing_color');
+if (wingColor) {
+    let filters = 'grayscale(1) brightness(1.2) contrast(1.2)';
+    if (wingColor === '#FFD700') {
+        filters += ` drop-shadow(0 0 10px ${wingColor})`;
+        filters += ` drop-shadow(0 0 20px ${wingColor})`;
+    } else {
+        filters += ` drop-shadow(0 0 12px ${wingColor})`;
+        filters += ` drop-shadow(0 0 24px ${wingColor})`;
+    }
+    accumulatedVideo.style.filter = filters;
+}
+
+// choice3의 border_color 적용
+const borderColor = localStorage.getItem('border_color');
+if (borderColor) {
+    const container = document.getElementById('accumulatedButterfly');
+    container.style.filter = `drop-shadow(0 0 20px ${borderColor})`;
+}
+</script>
+
+</body>
+</html>

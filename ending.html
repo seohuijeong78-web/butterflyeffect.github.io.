@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE BUTTERFLY EFFECT</title>
+    <style>
+        @import url('https://fonts.cdnfonts.com/css/theano-didot');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: url('https://res.cloudinary.com/dshryrukz/image/upload/c_scale,w_64,h_64/v1765643690/%EB%A7%88%EC%9A%B0%EC%8A%A4_%EC%BB%A4%EC%84%9C%E3%85%A1%E3%85%A1_vh2ug3.png') 32 32, auto !important;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Trajan Pro', serif;
+        }
+
+        /* 배경 비디오 */
+        #bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        /* 컨텐츠 레이어 */
+        .content-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        /* 상단 타이틀 */
+        .main-title {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            color: #FFFFFF;
+            letter-spacing: 8px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        /* 상단 버튼들 */
+        .top-buttons {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            z-index: 100;
+            display: flex;
+            gap: 15px;
+        }
+
+        .icon-btn {
+            width: 50px;
+            height: 50px;
+            background: transparent;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .icon-btn:hover {
+            opacity: 0.7;
+        }
+
+        .icon-btn svg {
+            width: 28px;
+            height: 28px;
+            stroke: #fff;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        /* 슬라이드 컨테이너 */
+        .slide-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            transform: translateY(-50%);
+            height: 500px;
+            overflow: visible;
+        }
+
+        .slide-container {
+            position: relative;
+            left: 0;
+            height: 100%;
+            display: flex;
+            transition: transform 0.6s ease;
+        }
+
+        /* 각 슬라이드 */
+        .slide {
+            width: 700px;
+            height: 100%;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin: 0 50px;
+        }
+        
+        /* GUIDE 슬라이드 숨김 */
+        .slide:nth-child(4),
+        .slide:nth-child(5),
+        .slide:nth-child(6) {
+            display: none;
+        }
+        
+        .slide.guide-visible {
+            display: flex;
+        }
+
+        /* 검은 사각형 */
+        .black-box {
+            width: 600px;
+            height: 350px;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 10px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 50px;
+        }
+
+        /* 사각형 내부 컨텐츠 */
+        .box-content {
+            width: 100%;
+            text-align: left;
+        }
+
+        .box-title {
+            font-family: 'Pretendard', sans-serif;
+            font-weight: 800;
+            font-size: 26px;
+            color: #FFFFFF;
+            margin-bottom: 40px;
+            letter-spacing: 1px;
+        }
+
+        .box-text {
+            font-family: 'Pretendard', sans-serif;
+            font-weight: 400;
+            font-size: 20px;
+            color: #FFFFFF;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .box-text-bottom {
+            margin-top: 50px;
+            margin-bottom: 0;
+            font-size: 16px;
+            font-family: 'Pretendard', sans-serif;
+        }
+
+        /* RESULT 선택 결과 스타일 */
+        .choice-result {
+            width: 100%;
+        }
+
+        .choice-line {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+            font-family: 'Pretendard', sans-serif;
+            font-size: 18px;
+            color: #FFFFFF;
+        }
+
+        .choice-label {
+            min-width: 110px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .choice-option {
+            padding: 0 15px;
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+
+        .choice-option.selected {
+            opacity: 1;
+            font-weight: 500;
+        }
+
+        .choice-separator {
+            opacity: 0.5;
+        }
+
+        /* 하단 라벨 */
+        .slide-label {
+            position: absolute;
+            top: 470px;
+            font-size: 18px;
+            color: #FFFFFF;
+            letter-spacing: 4px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        /* 하단 인디케이터 - 소제목 아래 */
+        .indicator-container {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+        }
+
+        .indicator {
+            width: 50px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+        
+        .indicator:nth-child(4),
+        .indicator:nth-child(5),
+        .indicator:nth-child(6) {
+            display: none;
+        }
+        
+        .indicator.guide-visible {
+            display: block;
+        }
+
+        .indicator.active {
+            background: rgba(0, 255, 255, 0.9);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+        }
+
+        /* 키보드 가이드 - 맨 아래 */
+        .keyboard-guide {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 2px;
+        }
+
+        /* 나비 박스 안에서만 날아다니기 */
+        @keyframes flyInBox {
+            0% { left: 10%; top: 20%; }
+            25% { left: 60%; top: 15%; }
+            50% { left: 70%; top: 50%; }
+            75% { left: 30%; top: 60%; }
+            100% { left: 10%; top: 20%; }
+        }
+        
+        /* 뒤로가기 방지 팝업 */
+        .back-prevention-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .back-prevention-modal.show {
+            display: flex;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .modal-content {
+            background: rgba(230, 230, 230, 0.75);
+            padding: 40px 50px;
+            border-radius: 6px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 18px;
+            color: #333;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            line-height: 1;
+        }
+        
+        .modal-text {
+            font-size: 18px;
+            color: #333;
+            letter-spacing: 1px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <!-- 뒤로가기 방지 팝업 -->
+    <div class="back-prevention-modal" id="backModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeModal">X</button>
+            <p class="modal-text">선택은 되돌릴 수 없습니다.</p>
+        </div>
+    </div>
+    
+    <!-- 배경 비디오 -->
+    <video id="bg-video" autoplay muted loop playsinline preload="auto">
+        <source src="https://res.cloudinary.com/dshryrukz/video/upload/v1765916056/엔딩_배경_mrzgzq.mp4" type="video/mp4">
+    </video>
+
+    <!-- 컨텐츠 -->
+    <div class="content-layer">
+        <!-- 상단 버튼들 -->
+        <div class="top-buttons">
+            <button class="icon-btn" id="compassBtn">
+                <svg viewBox="0 0 24 24" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="white"/>
+                </svg>
+            </button>
+            <button class="icon-btn" id="closeBtn">
+                <svg viewBox="0 0 24 24" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- 상단 타이틀 -->
+        <h1 class="main-title">THE BUTTERFLY EFFECT</h1>
+
+        <!-- 슬라이드 컨테이너 -->
+        <div class="slide-wrapper">
+            <div class="slide-container" id="slideContainer">
+                <!-- 슬라이드 1: REMIND -->
+                <div class="slide">
+                    <div class="black-box">
+                        <div class="box-content">
+                            <h2 class="box-title" style="font-family: 'Theano Didot', 'Trajan Pro', serif;">나비효과 (BUTTERFLY EFFECT)</h2>
+                            <p class="box-text">모든 선택에는 결과가 있고<br>모든 순간은 연결되어 있습니다.</p>
+                            <p class="box-text box-text-bottom">당신의 지난 선택이<br>그린 궤적을 되돌아보세요.</p>
+                        </div>
+                    </div>
+                    <div class="slide-label">REMIND</div>
+                </div>
+
+                <!-- 슬라이드 2: DESTINATION -->
+                <div class="slide">
+                    <div class="black-box" style="position: relative; overflow: hidden;">
+                        <img src="https://res.cloudinary.com/dshryrukz/image/upload/v1765920973/REMIND_1_afkdzy.png" alt="DESTINATION" style="width: 250%; height: 250%; object-fit: contain; opacity: 0.66; position: relative; left: -33px;">
+                        
+                        <!-- 누적 나비 컨테이너 -->
+                        <div id="accumulatedButterflyContainer" style="position: absolute; width: 150px; height: 150px; z-index: 10; pointer-events: none; animation: flyInBox 20s ease-in-out infinite;">
+                            <!-- 누적 나비 비디오 -->
+                            <video id="accumulatedButterfly" muted loop playsinline autoplay style="width: 100%; height: 100%; object-fit: contain;">
+                            </video>
+                            <!-- 입자 효과 컨테이너 -->
+                            <div id="particleContainer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></div>
+                        </div>
+                    </div>
+                    <div class="slide-label">DESTINATION</div>
+                </div>
+
+                <!-- 슬라이드 3: RESULT -->
+                <div class="slide">
+                    <div class="black-box">
+                        <div class="box-content" style="padding-top: 20px;">
+                            <h2 class="box-title" style="font-family: 'Theano Didot', 'Trajan Pro', serif; text-align: left; margin-bottom: 25px;">YOUR JOURNEY</h2>
+                            
+                            <!-- 선택 결과 표시 -->
+                            <div class="choice-result">
+                                <div class="choice-line">
+                                    <span class="choice-label" style="font-family: 'Theano Didot', 'Trajan Pro', serif;">CHOICE 1 :</span>
+                                    <span class="choice-option" id="choice1-morning">아침에 출발</span>
+                                    <span class="choice-separator">|</span>
+                                    <span class="choice-option" id="choice1-evening">저녁에 출발</span>
+                                </div>
+                                
+                                <div class="choice-line">
+                                    <span class="choice-label" style="font-family: 'Theano Didot', 'Trajan Pro', serif;">CHOICE 2 :</span>
+                                    <span class="choice-option" id="choice2-sound">소리를 따라</span>
+                                    <span class="choice-separator">|</span>
+                                    <span class="choice-option" id="choice2-light">빛을 따라</span>
+                                </div>
+                                
+                                <div class="choice-line">
+                                    <span class="choice-label" style="font-family: 'Theano Didot', 'Trajan Pro', serif;">CHOICE 3 :</span>
+                                    <span class="choice-option" id="choice3-slow">여유롭게</span>
+                                    <span class="choice-separator">|</span>
+                                    <span class="choice-option" id="choice3-fast">다급하게</span>
+                                </div>
+                                
+                                <div class="choice-line">
+                                    <span class="choice-label" style="font-family: 'Theano Didot', 'Trajan Pro', serif;">CHOICE 4 :</span>
+                                    <span class="choice-option" id="choice4-together">함께</span>
+                                    <span class="choice-separator">|</span>
+                                    <span class="choice-option" id="choice4-alone">혼자</span>
+                                </div>
+                            </div>
+                            
+                            <p class="box-text box-text-bottom" style="text-align: left; margin-top: 20px;">
+                                작은 날개짓이 만든 당신만의 세계
+                            </p>
+                        </div>
+                    </div>
+                    <div class="slide-label">RESULT</div>
+                </div>
+
+                <!-- 슬라이드 4: GUIDE 1 -->
+                <div class="slide">
+                    <div class="black-box" style="overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                        <img src="https://res.cloudinary.com/dshryrukz/image/upload/v1766089717/%EC%95%84%ED%8A%B8%EB%B3%B4%EB%93%9C_1_nggrgy.png" style="width: 106%; height: auto; object-fit: contain;">
+                    </div>
+                    <div class="slide-label">GUIDE 1</div>
+                </div>
+
+                <!-- 슬라이드 5: GUIDE 2 -->
+                <div class="slide">
+                    <div class="black-box" style="overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                        <img src="https://res.cloudinary.com/dshryrukz/image/upload/v1766089757/%E3%85%8E%E3%85%8E_fukved.png" style="width: 106%; height: auto; object-fit: contain;">
+                    </div>
+                    <div class="slide-label">GUIDE 2</div>
+                </div>
+
+                <!-- 슬라이드 6: GUIDE 3 -->
+                <div class="slide">
+                    <div class="black-box" style="overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                        <img src="https://res.cloudinary.com/dshryrukz/image/upload/v1766089825/%E3%85%8E%E3%85%85%E3%85%8E%E3%85%85%E3%85%8E_ifcohz.png" style="width: 106%; height: auto; object-fit: contain;">
+                    </div>
+                    <div class="slide-label">GUIDE 3</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 인디케이터 -->
+        <div class="indicator-container">
+            <div class="indicator active"></div>
+            <div class="indicator"></div>
+            <div class="indicator"></div>
+            <div class="indicator"></div>
+            <div class="indicator"></div>
+            <div class="indicator"></div>
+        </div>
+
+        <!-- 키보드 가이드 -->
+        <div class="keyboard-guide">← → 키로 이동</div>
+    </div>
+
+    <script>
+        // 뒤로가기 방지 강화
+        (function() {
+            history.pushState(null, null, location.href);
+            
+            window.addEventListener('popstate', function(event) {
+                history.pushState(null, null, location.href);
+                document.getElementById('backModal').classList.add('show');
+            });
+            
+            window.addEventListener('load', function() {
+                window.history.pushState(null, "", window.location.href);
+                window.onpopstate = function() {
+                    window.history.pushState(null, "", window.location.href);
+                    document.getElementById('backModal').classList.add('show');
+                };
+            });
+        })();
+        
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('backModal').classList.remove('show');
+        });
+        
+        // X 버튼 클릭시 HOME으로 이동
+        document.getElementById('closeBtn').addEventListener('click', () => {
+            window.location.href = 'HOME.html';
+        });
+        
+        // 슬라이드 네비게이션
+        let currentSlide = 0;
+        const totalSlides = 6;
+        let guideUnlocked = false;
+        const slideContainer = document.getElementById('slideContainer');
+        const indicators = document.querySelectorAll('.indicator');
+        const slideWidth = 800;
+
+        // 나침반 버튼 클릭 이벤트
+        document.getElementById('compassBtn').addEventListener('click', () => {
+            guideUnlocked = true;
+            
+            // GUIDE 슬라이드와 인디케이터 표시
+            document.querySelectorAll('.slide:nth-child(4), .slide:nth-child(5), .slide:nth-child(6)').forEach(slide => {
+                slide.classList.add('guide-visible');
+            });
+            document.querySelectorAll('.indicator:nth-child(4), .indicator:nth-child(5), .indicator:nth-child(6)').forEach(ind => {
+                ind.classList.add('guide-visible');
+            });
+            
+            currentSlide = 3;
+            updateSlide();
+        });
+
+        function updateSlide() {
+            const offset = (window.innerWidth / 2) - (slideWidth / 2) - (currentSlide * slideWidth);
+            slideContainer.style.transform = `translateX(${offset}px)`;
+            
+            indicators.forEach((ind, idx) => {
+                ind.classList.toggle('active', idx === currentSlide);
+            });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                const maxSlide = guideUnlocked ? totalSlides - 1 : 2;
+                currentSlide++;
+                if (currentSlide > maxSlide) currentSlide = 0;
+                updateSlide();
+            } else if (e.key === 'ArrowLeft') {
+                const minSlide = guideUnlocked ? 0 : 0;
+                currentSlide--;
+                if (currentSlide < 0) currentSlide = guideUnlocked ? totalSlides - 1 : 2;
+                updateSlide();
+            }
+        });
+
+        updateSlide();
+
+        // localStorage에서 선택 결과 불러와서 표시
+        const choice1 = localStorage.getItem('choice1');
+        const choice2 = localStorage.getItem('choice2');
+        const choice3 = localStorage.getItem('choice3');
+        const choice4 = localStorage.getItem('choice4');
+
+        // CHOICE 1
+        if (choice1 === 'morning') {
+            document.getElementById('choice1-morning').classList.add('selected');
+        } else if (choice1 === 'evening') {
+            document.getElementById('choice1-evening').classList.add('selected');
+        }
+
+        // CHOICE 2
+        if (choice2 === 'sound') {
+            document.getElementById('choice2-sound').classList.add('selected');
+        } else if (choice2 === 'light') {
+            document.getElementById('choice2-light').classList.add('selected');
+        }
+
+        // CHOICE 3
+        if (choice3 === 'slow') {
+            document.getElementById('choice3-slow').classList.add('selected');
+        } else if (choice3 === 'fast') {
+            document.getElementById('choice3-fast').classList.add('selected');
+        }
+
+        // CHOICE 4
+        if (choice4 === 'together') {
+            document.getElementById('choice4-together').classList.add('selected');
+        } else if (choice4 === 'alone') {
+            document.getElementById('choice4-alone').classList.add('selected');
+        }
+
+        // 누적 나비 설정 - 즉시 실행
+        const butterflyVideo = document.getElementById('accumulatedButterfly');
+        const butterflyContainer = document.getElementById('accumulatedButterflyContainer');
+        const accumulatedButterflyUrl = localStorage.getItem('butterfly_video');
+        const defaultVideo = 'https://res.cloudinary.com/dshryrukz/video/upload/v1765638063/Re_ribbon_butterfly_lotqdi.webm';
+        
+        // choice4 선택에 따른 크기 조정
+        if (choice4 === 'alone') {
+            butterflyContainer.style.width = '250px';
+            butterflyContainer.style.height = '250px';
+        } else {
+            butterflyContainer.style.width = '150px';
+            butterflyContainer.style.height = '150px';
+        }
+        
+        // 비디오 src 설정
+        butterflyVideo.src = accumulatedButterflyUrl || defaultVideo;
+        
+        // 강제 loop 설정
+        butterflyVideo.loop = true;
+        butterflyVideo.muted = true;
+        butterflyVideo.playsInline = true;
+        
+        // choice1의 wing_color 적용
+        const wingColor = localStorage.getItem('wing_color');
+        let filters = 'grayscale(1) brightness(1.2) contrast(1.2)';
+        
+        if (wingColor) {
+            if (wingColor === '#FFD700') {
+                filters += ` drop-shadow(0 0 10px ${wingColor}) drop-shadow(0 0 20px ${wingColor})`;
+            } else {
+                filters += ` drop-shadow(0 0 12px ${wingColor}) drop-shadow(0 0 24px ${wingColor})`;
+            }
+        }
+        
+        // choice3의 border_color 적용
+        const borderColor = localStorage.getItem('border_color');
+        if (borderColor) {
+            filters += ` drop-shadow(0 0 25px ${borderColor}) drop-shadow(0 0 40px ${borderColor})`;
+        }
+        
+        butterflyVideo.style.filter = filters;
+        
+        // 비디오 로드
+        butterflyVideo.load();
+        
+        // 재생 함수
+        const playVideo = () => {
+            if (butterflyVideo.paused) {
+                butterflyVideo.play().catch(() => {});
+            }
+        };
+        
+        // 즉시 재생
+        playVideo();
+        
+        // 매우 빠른 되감기 - 0.1초 전에 되감기 (찢어진 나비와 동일)
+        butterflyVideo.addEventListener('timeupdate', function() {
+            if (this.duration > 0 && this.currentTime >= this.duration - 0.1) {
+                this.currentTime = 0;
+            }
+        });
+        
+        // ended 이벤트 - 즉시 재시작
+        butterflyVideo.addEventListener('ended', function() {
+            this.currentTime = 0;
+            this.play();
+        });
+        
+        // pause 방지 - 즉시 재생
+        butterflyVideo.addEventListener('pause', function() {
+            if (this.currentTime < this.duration - 0.1) {
+                this.play();
+            }
+        });
+        
+        // seeking 완료 후 재생
+        butterflyVideo.addEventListener('seeked', playVideo);
+        
+        // 비디오 준비되면 재생
+        butterflyVideo.addEventListener('canplay', playVideo);
+        butterflyVideo.addEventListener('loadeddata', playVideo);
+        
+        // 20ms마다 매우 빠르게 체크 (더 자주 체크)
+        setInterval(() => {
+            if (butterflyVideo.paused && butterflyVideo.readyState >= 2) {
+                playVideo();
+            }
+        }, 20);
+        
+        // choice2에서 소리 선택 + choice3에서 여유롭게 선택했을 때 입자 효과
+        if (localStorage.getItem('sound_particles') === 'true') {
+            const particleContainer = document.getElementById('particleContainer');
+            
+            function spawnParticle() {
+                const particle = document.createElement('div');
+                const size = Math.random() * 3 + 2;
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 60 + 10;
+                const startX = Math.cos(angle) * distance;
+                const startY = Math.sin(angle) * distance;
+                const moveX = (Math.random() - 0.5) * 20;
+                const moveY = (Math.random() - 0.5) * 20;
+                
+                particle.style.cssText = `
+                    position: absolute;
+                    left: calc(50% + ${startX}px);
+                    top: calc(50% + ${startY}px);
+                    width: ${size}px;
+                    height: ${size}px;
+                    background: rgba(255, 255, 255, 1);
+                    border-radius: 50%;
+                    box-shadow: 0 0 8px rgba(255, 255, 255, 1), 0 0 12px rgba(255, 255, 255, 0.8);
+                    opacity: 0;
+                    animation: particleFloat 2.5s ease-in-out forwards;
+                    --move-x: ${moveX}px;
+                    --move-y: ${moveY}px;
+                    pointer-events: none;
+                `;
+                
+                particleContainer.appendChild(particle);
+                setTimeout(() => particle.remove(), 2500);
+            }
+            
+            // 입자 애니메이션 스타일 추가
+            if (!document.getElementById('particle-style')) {
+                const style = document.createElement('style');
+                style.id = 'particle-style';
+                style.textContent = `
+                    @keyframes particleFloat {
+                        0% { opacity: 0; transform: translate(0, 0) scale(0.3); }
+                        30% { opacity: 1; }
+                        70% { opacity: 0.9; }
+                        100% { opacity: 0; transform: translate(var(--move-x), var(--move-y)) scale(1); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // 입자 생성 시작
+            setInterval(spawnParticle, 300);
+        }
+    </script>
+</body>
+</html>

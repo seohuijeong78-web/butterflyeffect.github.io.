@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>선택 2: 방향 - 신비로운 문</title>
+    <style>
+        @font-face {
+            font-family: 'Didot LT Std';
+            src: url('DidotLTStd-Roman.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: url('https://res.cloudinary.com/dshryrukz/image/upload/c_scale,w_64,h_64/v1765643690/%EB%A7%88%EC%9A%B0%EC%8A%A4_%EC%BB%A4%EC%84%9C%E3%85%A1%E3%85%A1_vh2ug3.png') 32 32, auto !important;
+        }
+        
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            background: #0a0a0f;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        /* 나비 비디오 컨테이너 */
+        .butterfly-video-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 400px;
+            z-index: 2;
+            pointer-events: none;
+            opacity: 1;
+            animation: wideRibbonFly 20s ease-in-out infinite;
+            transition: none;
+        }
+
+        .butterfly-video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            /* 색상은 JavaScript로 동적 적용 */
+        }
+        
+        /* 찢어지는 효과 */
+        .butterfly-video-container.torn-effect video {
+            clip-path: polygon(
+                0% 0%, 
+                100% 0%, 
+                95% 30%, 
+                100% 50%, 
+                90% 70%, 
+                100% 100%, 
+                0% 100%,
+                5% 70%,
+                0% 50%,
+                10% 30%
+            );
+        }
+
+        /* 소리 문으로 빨려 들어가는 애니메이션 */
+        .butterfly-video-container.fly-to-sound {
+            animation: flyToSoundDoor 1.5s ease-in forwards;
+        }
+
+        @keyframes flyToSoundDoor {
+            0% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) translateX(-170px) translateY(-50px) scale(0.1);
+                opacity: 0;
+            }
+        }
+
+        /* 빛 문으로 빨려 들어가는 애니메이션 */
+        .butterfly-video-container.fly-to-light {
+            animation: flyToLightDoor 1.5s ease-in forwards;
+        }
+
+        @keyframes flyToLightDoor {
+            0% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) translateX(170px) translateY(10px) scale(0.1);
+                opacity: 0;
+            }
+        }
+
+        /* 넓은 8자 리본 모양 경로 - 두 문 사이에서만 */
+        @keyframes wideRibbonFly {
+            0% {
+                transform: translate(-50%, -50%) translateX(-200px) translateY(150px);
+            }
+            12.5% {
+                transform: translate(-50%, -50%) translateX(-150px) translateY(50px);
+            }
+            25% {
+                transform: translate(-50%, -50%) translateX(0px) translateY(30px);
+            }
+            37.5% {
+                transform: translate(-50%, -50%) translateX(150px) translateY(50px);
+            }
+            50% {
+                transform: translate(-50%, -50%) translateX(200px) translateY(150px);
+            }
+            62.5% {
+                transform: translate(-50%, -50%) translateX(150px) translateY(250px);
+            }
+            75% {
+                transform: translate(-50%, -50%) translateX(0px) translateY(270px);
+            }
+            87.5% {
+                transform: translate(-50%, -50%) translateX(-150px) translateY(250px);
+            }
+            100% {
+                transform: translate(-50%, -50%) translateX(-200px) translateY(150px);
+            }
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            transform: scale(0.8) translateY(-50px);
+            transform: scale(0.8) translateY(-50px);
+        }
+        
+        /* 배경 */
+        .butterfly-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 30% 50%, rgba(75, 0, 130, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(255, 215, 0, 0.15) 0%, transparent 50%);
+            filter: blur(100px);
+            z-index: 0;
+        }
+        
+        .screen-content {
+            padding: 30px 40px 100px;
+            position: relative;
+            background: radial-gradient(circle at 50% 50%, rgba(20, 20, 35, 0.3) 0%, transparent 60%);
+            z-index: 1;
+        }
+        
+        /* 타이틀 */
+        .center-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .main-title {
+            font-size: 64px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.95);
+            letter-spacing: 6px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            font-family: 'Didot LT Std', 'Didot', 'Times New Roman', serif;
+        }
+        
+        .divider-line {
+            width: 250px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+            margin: 0 auto 30px;
+        }
+        
+        .subtitle {
+            font-size: 20px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 2;
+            letter-spacing: 2px;
+        }
+        
+        /* 두 개의 문 */
+        .doors-container {
+            display: flex;
+            gap: 80px;
+            align-items: flex-end;
+            justify-content: center;
+            margin-top: 80px;
+        }
+        
+        .door {
+            width: 230px;
+            height: 370px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.5s ease;
+        }
+        
+        .door:hover {
+            transform: translateY(-15px);
+        }
+        
+        .door-frame {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .door-arch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 170px;
+            height: 85px;
+            border: 4px solid;
+            border-bottom: none;
+            border-radius: 85px 85px 0 0;
+        }
+        
+        .door-panel {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 170px;
+            height: 285px;
+            position: relative;
+            overflow: visible;
+        }
+        
+        .door-left,
+        .door-right {
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            border: 4px solid;
+            border-top: none;
+            transition: all 1s ease;
+            overflow: hidden;
+        }
+        
+        .door-left {
+            left: 0;
+            border-right: 2px solid;
+            border-radius: 0 0 0 12px;
+            transform-origin: left center;
+        }
+        
+        .door-right {
+            right: 0;
+            border-left: 2px solid;
+            border-radius: 0 0 12px 0;
+            transform-origin: right center;
+        }
+        
+        .door.opening .door-left {
+            transform: perspective(1200px) rotateY(-85deg);
+        }
+        
+        .door.opening .door-right {
+            transform: perspective(1200px) rotateY(85deg);
+        }
+        
+        .door-inner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.3;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+        
+        .door-knob {
+            position: absolute;
+            top: 50%;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .door-left .door-knob {
+            right: 10px;
+        }
+        
+        .door-right .door-knob {
+            left: 10px;
+        }
+        
+        /* 소리 문 */
+        .door-sound .door-arch {
+            border-color: rgba(138, 43, 226, 0.5);
+            box-shadow: 0 0 30px rgba(138, 43, 226, 0.4);
+        }
+        
+        .door-sound .door-left,
+        .door-sound .door-right {
+            border-color: rgba(138, 43, 226, 0.5);
+            background: rgba(20, 10, 40, 0.6);
+            box-shadow: 0 0 40px rgba(138, 43, 226, 0.3);
+        }
+        
+        .door-sound .door-inner {
+            background: linear-gradient(180deg, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.2) 100%);
+        }
+        
+        .door-sound .door-knob {
+            background: rgba(138, 43, 226, 0.6);
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.6);
+        }
+        
+        .door-sound:hover .door-arch,
+        .door-sound:hover .door-left,
+        .door-sound:hover .door-right {
+            border-color: rgba(138, 43, 226, 0.8);
+            box-shadow: 0 0 50px rgba(138, 43, 226, 0.6);
+        }
+        
+        .door-sound:hover .door-inner {
+            opacity: 0.6;
+        }
+        
+        /* 소리 파동 */
+        .sound-wave {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        .door-sound:hover .sound-wave {
+            animation: soundPulse 2s ease-out infinite;
+        }
+        
+        .door-sound.opening .sound-wave {
+            opacity: 1;
+            animation: soundExpand 2s ease-out forwards;
+        }
+        
+        .wave-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(138, 43, 226, 0.6);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .wave-circle:nth-child(2) { animation-delay: 0.3s; }
+        .wave-circle:nth-child(3) { animation-delay: 0.6s; }
+        
+        @keyframes soundPulse {
+            0% {
+                width: 40px;
+                height: 40px;
+                opacity: 1;
+            }
+            100% {
+                width: 160px;
+                height: 160px;
+                opacity: 0;
+            }
+        }
+        
+        @keyframes soundExpand {
+            0% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+        
+        .door-sound.opening .wave-circle {
+            animation: waveSpread 2s ease-out forwards !important;
+        }
+        
+        @keyframes waveSpread {
+            0% {
+                width: 40px;
+                height: 40px;
+                opacity: 1;
+                border-width: 3px;
+            }
+            100% {
+                width: 2000px;
+                height: 2000px;
+                opacity: 0;
+                border-width: 1px;
+            }
+        }
+        
+        /* 빛 문 */
+        .door-light .door-arch {
+            border-color: rgba(255, 215, 0, 0.5);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+        }
+        
+        .door-light .door-left,
+        .door-light .door-right {
+            border-color: rgba(255, 215, 0, 0.5);
+            background: rgba(40, 35, 10, 0.6);
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+        }
+        
+        .door-light .door-inner {
+            background: linear-gradient(180deg, rgba(255, 215, 0, 0.3) 0%, rgba(255, 193, 7, 0.2) 100%);
+        }
+        
+        .door-light .door-knob {
+            background: rgba(255, 215, 0, 0.6);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+        
+        .door-light:hover .door-arch,
+        .door-light:hover .door-left,
+        .door-light:hover .door-right {
+            border-color: rgba(255, 215, 0, 0.8);
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.6);
+        }
+        
+        .door-light:hover .door-inner {
+            opacity: 0.6;
+        }
+        
+        /* 빛 효과 */
+        .light-burst {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 100;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.6) 0%, rgba(255, 193, 7, 0.3) 30%, transparent 70%);
+            border-radius: 50%;
+        }
+        
+        .door-light.opening .light-burst {
+            opacity: 1;
+            animation: lightExpand 2s ease-out forwards;
+        }
+        
+        @keyframes lightExpand {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(0);
+            }
+            50% {
+                opacity: 0.8;
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(15);
+            }
+        }
+        
+        .light-ray {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 200px;
+            background: linear-gradient(to bottom, rgba(255, 215, 0, 0.8), transparent);
+            transform-origin: top center;
+            opacity: 0;
+        }
+        
+        .door-light.opening .light-ray {
+            animation: rayShine 2s ease-out forwards;
+        }
+        
+        @keyframes rayShine {
+            0% {
+                opacity: 0;
+                height: 0;
+            }
+            50% {
+                opacity: 1;
+                height: 800px;
+            }
+            100% {
+                opacity: 0;
+                height: 1200px;
+            }
+        }
+        
+        .light-ray:nth-child(1) { transform: translate(-50%, -50%) rotate(0deg); }
+        .light-ray:nth-child(2) { transform: translate(-50%, -50%) rotate(45deg); animation-delay: 0.1s; }
+        .light-ray:nth-child(3) { transform: translate(-50%, -50%) rotate(90deg); animation-delay: 0.2s; }
+        .light-ray:nth-child(4) { transform: translate(-50%, -50%) rotate(135deg); animation-delay: 0.3s; }
+        .light-ray:nth-child(5) { transform: translate(-50%, -50%) rotate(180deg); animation-delay: 0.4s; }
+        .light-ray:nth-child(6) { transform: translate(-50%, -50%) rotate(225deg); animation-delay: 0.5s; }
+        .light-ray:nth-child(7) { transform: translate(-50%, -50%) rotate(270deg); animation-delay: 0.6s; }
+        .light-ray:nth-child(8) { transform: translate(-50%, -50%) rotate(315deg); animation-delay: 0.7s; }
+        
+        /* 반짝임 */
+        .sparkles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .door-light:hover .sparkles,
+        .door-light.opening .sparkles {
+            opacity: 1;
+        }
+        
+        .sparkle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 215, 0, 0.9);
+            border-radius: 50%;
+            animation: sparkleFloat 2s ease-in-out infinite;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        }
+        
+        .sparkle:nth-child(1) { top: 20%; left: 30%; animation-delay: 0s; }
+        .sparkle:nth-child(2) { top: 40%; right: 25%; animation-delay: 0.3s; }
+        .sparkle:nth-child(3) { top: 60%; left: 20%; animation-delay: 0.6s; }
+        .sparkle:nth-child(4) { top: 80%; right: 30%; animation-delay: 0.9s; }
+        .sparkle:nth-child(5) { top: 30%; left: 50%; animation-delay: 1.2s; }
+        
+        @keyframes sparkleFloat {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+                opacity: 0;
+            }
+            50% {
+                transform: translateY(-30px) scale(1.5);
+                opacity: 1;
+            }
+        }
+        
+        .door-label {
+            position: absolute;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 16px;
+            letter-spacing: 2px;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+        
+        .door-sound .door-label {
+            color: rgba(200, 180, 255, 0.8);
+        }
+        
+        .door-light .door-label {
+            color: rgba(255, 235, 150, 0.8);
+        }
+        
+        .door:hover .door-label {
+            transform: translateX(-50%) translateY(-5px);
+        }
+        
+        /* 뒤로가기 방지 팝업 */
+        .back-prevention-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .back-prevention-modal.show {
+            display: flex;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .modal-content {
+            background: rgba(230, 230, 230, 0.75);
+            padding: 40px 50px;
+            border-radius: 6px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 18px;
+            color: #333;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            line-height: 1;
+        }
+        
+        .modal-text {
+            font-size: 18px;
+            color: #333;
+            letter-spacing: 1px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <!-- 배경음악 -->
+    <audio id="bgMusic" loop autoplay>
+        <source src="meditation-loop-30s.mp3" type="audio/mpeg">
+    </audio>
+    
+    <div class="butterfly-bg"></div>
+    
+    <!-- 뒤로가기 방지 팝업 -->
+    <div class="back-prevention-modal" id="backModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeModal">X</button>
+            <p class="modal-text">선택은 되돌릴 수 없습니다.</p>
+        </div>
+    </div>
+    
+    
+    <!-- 나비 비디오 -->
+    <div class="butterfly-video-container" id="butterflyVideo">
+        <video autoplay loop muted playsinline preload="auto">
+            <source src="https://res.cloudinary.com/dshryrukz/video/upload/v1764701697/Re_ribbon_butterfly_eckwbf.webm" type="video/webm">
+        </video>
+    </div>
+    
+    <div class="container">
+        <div class="screen-content">
+            <div class="center-title">
+                <h1 class="main-title">Direction</h1>
+                <div class="divider-line"></div>
+                <p class="subtitle">
+                    소리와 빛 중에 어디로 갈까요?
+                </p>
+            </div>
+            
+            <div class="doors-container">
+                <div class="door door-sound" onclick="openSoundDoor(this)">
+                    <div class="sound-wave">
+                        <div class="wave-circle"></div>
+                        <div class="wave-circle"></div>
+                        <div class="wave-circle"></div>
+                    </div>
+                    <div class="door-frame">
+                        <div class="door-arch"></div>
+                        <div class="door-panel">
+                            <div class="door-left">
+                                <div class="door-inner"></div>
+                                <div class="door-knob"></div>
+                            </div>
+                            <div class="door-right">
+                                <div class="door-inner"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="door-label">들리는 소리를 따라</div>
+                </div>
+                
+                <div class="door door-light" onclick="openLightDoor(this)">
+                    <div class="light-burst">
+                        <div class="light-ray"></div>
+                        <div class="light-ray"></div>
+                        <div class="light-ray"></div>
+                        <div class="light-ray"></div>
+                        <div class="light-ray"></div>
+                        <div class="light-ray"></div>
+                        <div class="light-ray"></div>
+                        <div class="light-ray"></div>
+                    </div>
+                    <div class="door-frame">
+                        <div class="door-arch"></div>
+                        <div class="door-panel">
+                            <div class="door-left">
+                                <div class="door-inner"></div>
+                                <div class="door-knob"></div>
+                                <div class="sparkles">
+                                    <div class="sparkle"></div>
+                                    <div class="sparkle"></div>
+                                    <div class="sparkle"></div>
+                                    <div class="sparkle"></div>
+                                    <div class="sparkle"></div>
+                                </div>
+                            </div>
+                            <div class="door-right">
+                                <div class="door-inner"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="door-label">보이는 빛을 따라</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 뒤로가기 방지 강화
+        (function() {
+            history.pushState(null, null, location.href);
+            
+            window.addEventListener('popstate', function(event) {
+                history.pushState(null, null, location.href);
+                document.getElementById('backModal').classList.add('show');
+            });
+            
+            // 추가 방지
+            window.addEventListener('load', function() {
+                window.history.pushState(null, "", window.location.href);
+                window.onpopstate = function() {
+                    window.history.pushState(null, "", window.location.href);
+                    document.getElementById('backModal').classList.add('show');
+                };
+            });
+        })();
+        
+        document.getElementById('closeModal').addEventListener('click', function() {
+        
+        // 배경음악 재생
+        const bgMusic = document.getElementById('bgMusic');
+        bgMusic.volume = 0.6;
+        bgMusic.play().catch(err => console.log('Music play failed:', err));
+        
+            document.getElementById('backModal').classList.remove('show');
+        });
+        
+        // 새로고침 감지 - HOME으로 리다이렉트
+        window.addEventListener('beforeunload', function() {
+            if (performance.navigation.type === 1) {
+                localStorage.clear();
+            }
+        });
+        
+        let isChoiceSelected = false;
+        
+        // 나비 비디오 무한 반복 재생 확실하게 설정
+        const butterflyVideo = document.querySelector('#butterflyVideo video');
+        const butterflyContainer = document.getElementById('butterflyVideo');
+        
+        // Choice 1에서 선택한 색상 불러오기
+        window.addEventListener('DOMContentLoaded', function() {
+            const wingColor = localStorage.getItem('wing_color');
+            
+            let filters = 'grayscale(1) brightness(1.2) contrast(1.1)';
+            
+            if (wingColor) {
+                // 노랑색은 더 약하게, 청록색은 그대로
+                if (wingColor === '#FFD700') {
+                    // 노랑 - 글로우 약하게
+                    filters += ` drop-shadow(0 0 8px ${wingColor})`;
+                    filters += ` drop-shadow(0 0 15px ${wingColor})`;
+                } else {
+                    // 청록 - 정상
+                    filters += ` drop-shadow(0 0 10px ${wingColor})`;
+                    filters += ` drop-shadow(0 0 20px ${wingColor})`;
+                }
+            }
+            
+            butterflyVideo.style.filter = filters;
+            
+            // 비디오 로드되면 재생
+            butterflyVideo.addEventListener('loadeddata', function() {
+                this.play();
+            });
+            
+            // 비디오 끝나면 즉시 다시 시작
+            butterflyVideo.addEventListener('ended', function() {
+                this.currentTime = 0;
+                this.play();
+            });
+            
+            // 추가 안전장치: 시간 체크
+            butterflyVideo.addEventListener('timeupdate', function() {
+                if (this.duration > 0 && this.currentTime >= this.duration - 0.1) {
+                    this.currentTime = 0;
+                }
+            });
+        });
+        
+        function openSoundDoor(door) {
+            if (isChoiceSelected) return;
+            isChoiceSelected = true;
+            
+            // 소리 선택: 정상 나비 명시적으로 저장, 입자만 활성화
+            localStorage.setItem('choice2', 'sound');
+            localStorage.setItem('sound_particles', 'true'); // 입자 효과만 활성화
+            localStorage.setItem('butterfly_video', 'https://res.cloudinary.com/dshryrukz/video/upload/v1764701697/Re_ribbon_butterfly_eckwbf.webm'); // 정상 리본 나비 명시적 저장
+            
+            // 소리 효과 재생
+            const soundEffect = new Audio('magical-sparkle-rise-fx-356090.mp3');
+            soundEffect.volume = 0.7;
+            soundEffect.play().catch(err => console.log('Audio play failed:', err));
+            
+            // 나비를 소리 문으로 빨아들임
+            butterflyContainer.classList.add('fly-to-sound');
+            
+            // 다른 문 비활성화
+            const lightDoor = document.querySelector('.door-light');
+            lightDoor.style.pointerEvents = 'none';
+            lightDoor.style.opacity = '0.3';
+            
+            door.classList.add('opening');
+            
+            // Choice 3로 이동
+            setTimeout(() => {
+                window.location.href = 'choice3.html';
+            }, 1500);
+        }
+        
+        function openLightDoor(door) {
+            if (isChoiceSelected) return;
+            isChoiceSelected = true;
+            
+            // 빛 선택: 찢어진 나비로 변경, 입자 없음
+            localStorage.setItem('choice2', 'light');
+            localStorage.setItem('butterfly_video', 'https://res.cloudinary.com/dshryrukz/video/upload/v1764788257/broken_butterfly_torn_sg4h6h.webm');
+            localStorage.setItem('sound_particles', 'false'); // 입자 없음
+            
+            // 나비를 빛 문으로 빨아들임
+            butterflyContainer.classList.add('fly-to-light');
+            
+            // 다른 문 비활성화
+            const soundDoor = document.querySelector('.door-sound');
+            soundDoor.style.pointerEvents = 'none';
+            soundDoor.style.opacity = '0.3';
+            
+            door.classList.add('opening');
+            
+            // Choice 3로 이동
+            setTimeout(() => {
+                window.location.href = 'choice3.html';
+            }, 1500);
+        }
+    </script>
+
+</body>
+</html>

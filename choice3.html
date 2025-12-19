@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>선택 3: 속도</title>
+    <style>
+        @font-face {
+            font-family: 'Didot LT Std';
+            src: url('DidotLTStd-Roman.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: url('https://res.cloudinary.com/dshryrukz/image/upload/c_scale,w_64,h_64/v1765643690/%EB%A7%88%EC%9A%B0%EC%8A%A4_%EC%BB%A4%EC%84%9C%E3%85%A1%E3%85%A1_vh2ug3.png') 32 32, auto !important;
+        }
+        
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            background: #0a0a0f;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        /* 나비 비디오 컨테이너 */
+        .butterfly-video-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 400px;
+            z-index: 2;
+            pointer-events: none;
+            opacity: 1;
+            transition: transform 0.1s ease-out, opacity 0.3s;
+        }
+
+        .butterfly-video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+        
+        /* 찢어지는 효과 */
+        .butterfly-video-container.torn-effect video {
+            clip-path: polygon(
+                0% 0%, 
+                100% 0%, 
+                95% 30%, 
+                100% 50%, 
+                90% 70%, 
+                100% 100%, 
+                0% 100%,
+                5% 70%,
+                0% 50%,
+                10% 30%
+            );
+        }
+        
+        /* 리본 모양 애니메이션 */
+        @keyframes ribbonFly {
+            0% {
+                transform: translate(-50%, -50%) translateX(-200px) translateY(150px);
+            }
+            12.5% {
+                transform: translate(-50%, -50%) translateX(-150px) translateY(50px);
+            }
+            25% {
+                transform: translate(-50%, -50%) translateX(0px) translateY(30px);
+            }
+            37.5% {
+                transform: translate(-50%, -50%) translateX(150px) translateY(50px);
+            }
+            50% {
+                transform: translate(-50%, -50%) translateX(200px) translateY(150px);
+            }
+            62.5% {
+                transform: translate(-50%, -50%) translateX(150px) translateY(250px);
+            }
+            75% {
+                transform: translate(-50%, -50%) translateX(0px) translateY(270px);
+            }
+            87.5% {
+                transform: translate(-50%, -50%) translateX(-150px) translateY(250px);
+            }
+            100% {
+                transform: translate(-50%, -50%) translateX(-200px) translateY(150px);
+            }
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            transform: scale(0.8) translateY(-50px);
+            transform: scale(0.8) translateY(-50px);
+        }
+        
+        /* 배경 */
+        .butterfly-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 30% 50%, rgba(96, 165, 250, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(248, 113, 113, 0.2) 0%, transparent 50%);
+            filter: blur(120px);
+            z-index: 0;
+        }
+        
+        .screen-content {
+            padding: 30px 40px 100px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* 타이틀 */
+        .center-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .main-title {
+            font-size: 64px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.95);
+            letter-spacing: 3px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            font-family: 'Didot LT Std', 'Didot', 'Times New Roman', serif; font-weight: normal;
+        }
+        
+        .divider-line {
+            width: 250px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+            margin: 0 auto 30px;
+        }
+        
+        .subtitle {
+            font-size: 20px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 2;
+            letter-spacing: 2px;
+        }
+        
+        /* Canvas 영역 */
+        .velocity-container {
+            width: 100%;
+            max-width: 800px;
+            height: 350px;
+            position: relative;
+            background: rgba(20, 20, 30, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 auto 20px;
+        }
+        
+        #fluidCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .drag-line {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 3px;
+            height: 80%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: grab;
+            transition: background 0.3s;
+            z-index: 10;
+        }
+        
+        .drag-line:active {
+            cursor: grabbing;
+        }
+        
+        .drag-line::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+        
+        .velocity-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 800px;
+            padding: 0 80px;
+            margin: 0 auto 25px;
+        }
+        
+        .label-left,
+        .label-right {
+            font-size: 18px;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+        }
+        
+        .label-left {
+            color: rgba(96, 165, 250, 0.7);
+        }
+        
+        .label-right {
+            color: rgba(248, 113, 113, 0.7);
+        }
+        
+        .label-left.active {
+            color: rgba(96, 165, 250, 1);
+            text-shadow: 0 0 15px rgba(96, 165, 250, 0.8);
+            font-size: 20px;
+        }
+        
+        .label-right.active {
+            color: rgba(248, 113, 113, 1);
+            text-shadow: 0 0 15px rgba(248, 113, 113, 0.8);
+            font-size: 20px;
+        }
+        
+        .instruction-text {
+            text-align: center;
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 1.5px;
+            margin-top: 0;
+        }
+        
+        /* 뒤로가기 방지 팝업 */
+        .back-prevention-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .back-prevention-modal.show {
+            display: flex;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .modal-content {
+            background: rgba(230, 230, 230, 0.75);
+            padding: 40px 50px;
+            border-radius: 6px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 18px;
+            color: #333;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            line-height: 1;
+        }
+        
+        .modal-text {
+            font-size: 18px;
+            color: #333;
+            letter-spacing: 1px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <!-- 뒤로가기 방지 팝업 -->
+    <div class="back-prevention-modal" id="backModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeModal">X</button>
+            <p class="modal-text">선택은 되돌릴 수 없습니다.</p>
+        </div>
+    </div>
+    
+    <!-- 배경음악 -->
+    <audio id="bgMusic" loop autoplay>
+        <source src="meditation-loop-30s.mp3" type="audio/mpeg">
+    </audio>
+    
+    <div class="butterfly-bg"></div>
+    
+    
+    <!-- 나비 비디오 -->
+    <div class="butterfly-video-container" id="butterflyVideo">
+        <video autoplay loop muted playsinline>
+            <source id="butterflySource" type="video/webm">
+        </video>
+    </div>
+    
+    <div class="container">
+        <div class="screen-content">
+            <div class="center-title">
+                <h1 class="main-title">HOW FAST</h1>
+                <div class="divider-line"></div>
+                <p class="subtitle">
+                    어떤 속도로 갈까요?
+                </p>
+            </div>
+            
+            <div class="velocity-container">
+                <canvas id="fluidCanvas"></canvas>
+                <div class="drag-line" id="dragLine"></div>
+            </div>
+            
+            <div class="velocity-labels">
+                <div class="label-left" id="labelLeft">여유롭게</div>
+                <div class="label-right" id="labelRight">다급하게</div>
+            </div>
+            
+            <p class="instruction-text">선택한 속도 쪽으로 끌어주세요.</p>
+        </div>
+    </div>
+
+    <script>
+        // 뒤로가기 방지 강화
+        (function() {
+            history.pushState(null, null, location.href);
+            
+            window.addEventListener('popstate', function(event) {
+                history.pushState(null, null, location.href);
+                document.getElementById('backModal').classList.add('show');
+            });
+            
+            window.addEventListener('load', function() {
+                window.history.pushState(null, "", window.location.href);
+                window.onpopstate = function() {
+                    window.history.pushState(null, "", window.location.href);
+                    document.getElementById('backModal').classList.add('show');
+                };
+            });
+        })();
+        
+        document.getElementById('closeModal').addEventListener('click', function() {
+        
+        // 배경음악 재생
+        const bgMusic = document.getElementById('bgMusic');
+        bgMusic.volume = 0.6;
+        bgMusic.play().catch(err => console.log('Music play failed:', err));
+        
+            document.getElementById('backModal').classList.remove('show');
+        });
+        
+        // 새로고침 감지 - HOME으로 리다이렉트
+        window.addEventListener('beforeunload', function() {
+            if (performance.navigation.type === 1) {
+                localStorage.clear();
+            }
+        });
+        
+        // ========== 나비 누적 효과 적용 ==========
+        const butterflyVideo = document.querySelector('#butterflyVideo video');
+        const butterflyContainer = document.getElementById('butterflyVideo');
+        
+        // 테스트용 함수
+        
+        // choice1, 2에서 누적된 효과 불러오기
+        window.addEventListener('DOMContentLoaded', () => {
+    const savedVideo = localStorage.getItem('butterfly_video');
+    const savedColor = localStorage.getItem('wing_color');
+    const source = document.getElementById('butterflySource');
+
+    // 기본 비디오 (리본 나비)
+    const defaultVideo = 'https://res.cloudinary.com/dshryrukz/video/upload/v1764701697/Re_ribbon_butterfly_eckwbf.webm';
+    
+    // savedVideo가 있으면 그걸 사용, 없으면 기본 비디오 사용
+    if (savedVideo) {
+        source.src = savedVideo;
+    } else {
+        source.src = defaultVideo;
+    }
+    butterflyVideo.load();
+
+    if (savedColor) {
+        butterflyVideo.style.filter = `
+            grayscale(1)
+            brightness(1.15)
+            contrast(1.1)
+            drop-shadow(0 0 10px ${savedColor})
+            drop-shadow(0 0 18px ${savedColor})
+        `;
+    }
+});
+        
+        // 작은 흰색 글로우 파티클 효과 생성 (나비와 완전히 겹침)
+        function createParticleEffect() {
+            const butterflyContainer = document.getElementById('butterflyVideo');
+            
+            const particleContainer = document.createElement('div');
+            particleContainer.id = 'particle-container';
+            particleContainer.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 2;
+            `;
+            butterflyContainer.appendChild(particleContainer);
+            
+            // 파티클 생성 함수
+            function spawnParticle() {
+                const particle = document.createElement('div');
+                const size = Math.random() * 3 + 2; // 2-5px 크기
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 80 + 20; // 나비 더 가까이
+                const startX = Math.cos(angle) * distance;
+                const startY = Math.sin(angle) * distance;
+                
+                // 아주 작은 이동
+                const moveX = (Math.random() - 0.5) * 20;
+                const moveY = (Math.random() - 0.5) * 20;
+                
+                particle.style.cssText = `
+                    position: absolute;
+                    left: calc(50% + ${startX}px);
+                    top: calc(50% + ${startY}px);
+                    width: ${size}px;
+                    height: ${size}px;
+                    background: rgba(255, 255, 255, 0.95);
+                    border-radius: 50%;
+                    box-shadow: 0 0 6px rgba(255, 255, 255, 0.9), 
+                                0 0 10px rgba(255, 255, 255, 0.6);
+                    opacity: 0;
+                    animation: particleFloat 2.5s ease-in-out forwards;
+                    --move-x: ${moveX}px;
+                    --move-y: ${moveY}px;
+                `;
+                
+                particleContainer.appendChild(particle);
+                
+                setTimeout(() => particle.remove(), 2500);
+            }
+            
+            // CSS 애니메이션 추가
+            if (!document.getElementById('particle-style')) {
+                const style = document.createElement('style');
+                style.id = 'particle-style';
+                style.textContent = `
+                    @keyframes particleFloat {
+                        0% { 
+                            opacity: 0; 
+                            transform: translate(0, 0) scale(0.3); 
+                        }
+                        30% { 
+                            opacity: 0.9; 
+                        }
+                        70% { 
+                            opacity: 0.7; 
+                        }
+                        100% { 
+                            opacity: 0; 
+                            transform: translate(var(--move-x), var(--move-y)) scale(1); 
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // 파티클 생성 주기 늘리기 (개수 줄임)
+            setInterval(spawnParticle, 400);
+        }
+        
+        // ========== 기존 Canvas 코드 ==========
+        const canvas = document.getElementById('fluidCanvas');
+        const ctx = canvas.getContext('2d');
+        const dragLine = document.getElementById('dragLine');
+        const labelLeft = document.getElementById('labelLeft');
+        const labelRight = document.getElementById('labelRight');
+        const container = document.querySelector('.velocity-container');
+
+        function resizeCanvas() {
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        class Particle {
+            constructor(x, y, vx, vy, intensity, direction) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.vy = vy;
+                this.life = 1;
+                this.intensity = intensity;
+                this.direction = direction; // 'left' or 'right'
+                // 왼쪽은 훨씬 작게
+                this.size = direction === 'left' ? 
+                    Math.random() * 1.2 + 0.8 : 
+                    Math.random() * 2.5 + 1.5;
+                this.twinkle = Math.random() * Math.PI * 2;
+                this.hue = direction === 'right' ? 350 + Math.random() * 20 : 200 + Math.random() * 40; // 분홍-빨강 vs 파랑-청록
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                // 부드러운 곡선 움직임 추가
+                this.y += Math.sin(this.x * 0.02) * 0.3;
+                
+                // 왼쪽은 훨씬 더 천천히
+                const damping = this.direction === 'right' ? 0.98 : 0.90;
+                this.vx *= damping;
+                this.vy *= damping;
+                
+                // 왼쪽은 빨리 사라짐
+                const lifeDamping = this.direction === 'right' ? 0.96 : 0.88;
+                this.life *= lifeDamping;
+                
+                // 반짝임 효과
+                this.twinkle += 0.1;
+            }
+
+            draw() {
+                // 왼쪽은 투명도 훨씬 낮게
+                const baseAlpha = this.direction === 'left' ? 0.3 : 0.6;
+                const alpha = this.life * baseAlpha;
+                const twinkleIntensity = (Math.sin(this.twinkle) + 1) * 0.5; // 0~1 사이값
+                const size = this.size * (1 + this.life * 0.3) * (0.8 + twinkleIntensity * 0.4);
+                
+                // 외곽 글로우
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, size * 2);
+                gradient.addColorStop(0, `hsla(${this.hue}, 80%, 70%, ${alpha * twinkleIntensity})`);
+                gradient.addColorStop(0.4, `hsla(${this.hue}, 70%, 60%, ${alpha * 0.6})`);
+                gradient.addColorStop(1, `hsla(${this.hue}, 60%, 50%, 0)`);
+                
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, size * 2, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                
+                // 중심 밝은 점
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, size * 0.5, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${this.hue}, 90%, 85%, ${alpha * twinkleIntensity})`;
+                ctx.fill();
+            }
+        }
+
+        let particles = [];
+        let isDragging = false;
+        let currentX = 0.5;
+
+        dragLine.style.left = '50%';
+
+        dragLine.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            dragLine.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+
+            const rect = container.getBoundingClientRect();
+            const relativeX = e.clientX - rect.left;
+            const normalizedX = Math.max(0, Math.min(1, relativeX / rect.width));
+            
+            currentX = normalizedX;
+            dragLine.style.left = `${normalizedX * 100}%`;
+
+            // 라벨 활성화 및 나비 테두리 실시간 적용
+            const wingColor = localStorage.getItem('wing_color') || '#FFD700';
+            let filters = 'grayscale(1) brightness(1.2) contrast(1.2)';
+            filters += ` drop-shadow(0 0 15px ${wingColor})`;
+            filters += ` drop-shadow(0 0 25px ${wingColor})`;
+            
+            // 나비 비디오에 기본 색상만 적용
+            butterflyVideo.style.filter = filters;
+            
+            // 나비를 드래그 방향으로 즉시 이동 (transition 없이)
+            const moveX = (normalizedX - 0.5) * 400; // -200 ~ 200px 이동
+            butterflyContainer.style.transition = 'none';
+            butterflyContainer.style.transform = `translate(calc(-50% + ${moveX}px), -50%)`;
+            
+            // 라벨 활성화
+            if (normalizedX < 0.4) {
+                labelLeft.classList.add('active');
+                labelRight.classList.remove('active');
+            } else if (normalizedX > 0.6) {
+                labelRight.classList.add('active');
+                labelLeft.classList.remove('active');
+            } else {
+                labelLeft.classList.remove('active');
+                labelRight.classList.remove('active');
+            }
+
+            // 중심에서 떨어진 거리 계산
+            const distanceFromCenter = Math.abs(normalizedX - 0.5);
+            const direction = normalizedX > 0.5 ? 'right' : 'left';
+            
+            // 파티클 생성 개수 (왼쪽은 훨씬 적게)
+            const particleCount = direction === 'left' ? 
+                Math.floor(distanceFromCenter * 8) + 1 : 
+                Math.floor(distanceFromCenter * 20) + 2;
+            
+            // 속도 계산
+            let baseSpeed, spread;
+            if (direction === 'right') {
+                // 오른쪽(다급하게): 더 빠르게
+                baseSpeed = 8 + distanceFromCenter * 20;
+                spread = 0.3;
+            } else {
+                // 왼쪽(여유롭게): 훨씬 더 느리게
+                baseSpeed = 1 + distanceFromCenter * 3;
+                spread = 0.5;
+            }
+
+            for (let i = 0; i < particleCount; i++) {
+                // 주 방향 각도
+                const mainAngle = direction === 'right' ? 0 : Math.PI;
+                // 랜덤 분산
+                const angle = mainAngle + (Math.random() - 0.5) * spread * Math.PI;
+                
+                const speed = baseSpeed * (0.8 + Math.random() * 0.4);
+                const vx = Math.cos(angle) * speed;
+                const vy = (Math.random() - 0.5) * speed * 0.3;
+                
+                particles.push(new Particle(
+                    relativeX,
+                    canvas.height / 2 + (Math.random() - 0.5) * 80,
+                    vx,
+                    vy,
+                    distanceFromCenter,
+                    direction
+                ));
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            dragLine.style.cursor = 'grab';
+            
+            // 선택 저장 및 나비 날아가기
+            const finalX = parseFloat(dragLine.style.left) / 100;
+            
+            let targetX = 0;
+            
+            if (finalX < 0.4) {
+                // 여유롭게 선택 - 왼쪽으로 날아가기
+                localStorage.setItem('choice3', 'slow');
+                localStorage.setItem('border_color', '#4DD0E8');
+                localStorage.setItem('sound_particles', 'true'); // 여유롭게 선택: 입자 활성화
+                targetX = -1000;
+                console.log('여유롭게 선택됨 - 파란 테두리, 입자 활성화');
+            } else if (finalX > 0.6) {
+                // 다급하게 선택 - 오른쪽으로 날아가기
+                localStorage.setItem('choice3', 'fast');
+                localStorage.setItem('border_color', '#B888D9');
+                localStorage.setItem('sound_particles', 'false'); // 다급하게 선택: 입자 제거
+                targetX = 1000;
+                console.log('다급하게 선택됨 - 보라 테두리, 입자 제거');
+            } else {
+                // 중간 - 선택 안됨
+                localStorage.setItem('choice3', 'middle');
+                targetX = 0;
+                console.log('중간 영역 - 다시 선택');
+                // 나비를 원위치로
+                butterflyContainer.style.transition = 'transform 0.3s ease-out';
+                butterflyContainer.style.transform = 'translate(-50%, -50%)';
+                return;
+            }
+            
+            // 나비 날아가는 애니메이션
+            butterflyContainer.style.transition = 'transform 0.8s ease-in';
+            butterflyContainer.style.transform = `translate(calc(-50% + ${targetX}px), -50%)`;
+            
+            // 페이드아웃
+            butterflyContainer.style.opacity = '0';
+            
+            // 페이지 이동
+            setTimeout(() => {
+                window.location.href = 'choice4.html';
+            }, 800);
+        });
+
+        function animate() {
+            // 트레일 효과 (반투명하게 덮기)
+            ctx.fillStyle = 'rgba(20, 20, 30, 0.15)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 파티클 업데이트 및 그리기
+            particles = particles.filter(p => p.life > 0.01);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+
+</body>
+</html>

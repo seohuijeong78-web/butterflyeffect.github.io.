@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>선택 1: 시간</title>
+    <style>
+        @font-face {
+            font-family: 'Didot LT Std';
+            src: url('DidotLTStd-Roman.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: url('https://res.cloudinary.com/dshryrukz/image/upload/c_scale,w_64,h_64/v1765643690/%EB%A7%88%EC%9A%B0%EC%8A%A4_%EC%BB%A4%EC%84%9C%E3%85%A1%E3%85%A1_vh2ug3.png') 32 32, auto !important;
+        }
+        
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            background: #0a0a0f;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: background 2s ease;
+            overflow: hidden;
+        }
+        
+        body.morning-mode {
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d3a5f 50%, #4a5f8f 100%);
+        }
+        
+        body.evening-mode {
+            background: #000000;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            transform: scale(0.9);
+        }
+        
+        .butterfly-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(ellipse at 30% 40%, rgba(138, 43, 226, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 60%, rgba(72, 61, 139, 0.12) 0%, transparent 50%);
+            filter: blur(80px);
+            z-index: 0;
+            transition: opacity 2s ease;
+        }
+        
+        body.morning-mode .butterfly-bg {
+            background-image: 
+                radial-gradient(ellipse at 30% 40%, rgba(255, 200, 100, 0.2) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 60%, rgba(255, 150, 80, 0.15) 0%, transparent 50%);
+        }
+        
+        body.evening-mode .butterfly-bg {
+            background-image: 
+                radial-gradient(ellipse at 30% 40%, rgba(20, 20, 60, 0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 60%, rgba(40, 40, 80, 0.2) 0%, transparent 50%);
+        }
+
+        .butterfly-video-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            z-index: 2;
+            pointer-events: none;
+            opacity: 0;
+            display: none;
+            transition: opacity 1s ease;
+        }
+
+        .butterfly-video-container.show {
+            opacity: 1;
+        }
+
+        .butterfly-video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        /* 저녁 모드 - 청록 글로우 */
+        .butterfly-video-container.evening-butterfly video {
+            filter: grayscale(1) brightness(1.3) contrast(1.2)
+                    drop-shadow(0 0 15px #4DD0D0) 
+                    drop-shadow(0 0 30px #4DD0D0)
+                    drop-shadow(0 0 45px #4DD0D0);
+        }
+
+        /* 나비가 날아다니는 애니메이션 */
+        @keyframes butterflyFly {
+            0% {
+                transform: translate(-50%, -50%) translateX(0) translateY(0) scale(1) rotate(0deg);
+            }
+            25% {
+                transform: translate(-50%, -50%) translateX(200px) translateY(-150px) scale(1.1) rotate(10deg);
+            }
+            50% {
+                transform: translate(-50%, -50%) translateX(-200px) translateY(100px) scale(0.9) rotate(-5deg);
+            }
+            75% {
+                transform: translate(-50%, -50%) translateX(300px) translateY(-80px) scale(1.05) rotate(8deg);
+            }
+            100% {
+                transform: translate(-50%, -50%) translateX(0) translateY(0) scale(1) rotate(0deg);
+            }
+        }
+
+        .butterfly-video-container.flying {
+            animation: butterflyFly 10s ease-in-out infinite;
+        }
+
+        /* 나비가 시계처럼 회전하며 중앙으로 가는 애니메이션 */
+        @keyframes butterflySpiral {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg) translateY(-200px) scale(1);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg) translateY(0px) scale(0.7);
+                opacity: 1;
+            }
+        }
+
+        .butterfly-video-container.spiraling {
+            display: block;
+            animation: butterflySpiral 2s ease-in-out forwards;
+        }
+        
+        .screen-content {
+            padding: 40px 40px 60px;
+            position: relative;
+            transition: all 2s ease;
+            z-index: 1;
+        }
+        
+        body.morning-mode .screen-content {
+            background: radial-gradient(circle at 50% 40%, rgba(255, 200, 100, 0.1) 0%, transparent 60%);
+        }
+        
+        body.evening-mode .screen-content {
+            background: radial-gradient(circle at 50% 40%, rgba(20, 20, 60, 0.15) 0%, transparent 60%);
+        }
+        
+        .center-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .main-title {
+            font-size: 64px;
+            font-weight: normal;
+            color: rgba(255, 255, 255, 0.95);
+            letter-spacing: 8px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            font-family: 'Didot LT Std', 'Didot', 'Times New Roman', serif;
+            transition: all 1s ease;
+        }
+        
+        body.morning-mode .main-title {
+            color: rgba(255, 235, 200, 1);
+            text-shadow: 0 0 30px rgba(255, 200, 100, 0.5);
+        }
+        
+        body.evening-mode .main-title {
+            color: rgba(150, 150, 200, 0.9);
+            text-shadow: 0 0 20px rgba(100, 100, 150, 0.3);
+        }
+        
+        .divider-line {
+            width: 200px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+            margin: 0 auto 30px;
+            transition: all 1s ease;
+        }
+        
+        body.morning-mode .divider-line {
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 200, 100, 0.5) 50%, transparent 100%);
+        }
+        
+        body.evening-mode .divider-line {
+            background: linear-gradient(90deg, transparent 0%, rgba(100, 100, 150, 0.4) 50%, transparent 100%);
+        }
+        
+        .subtitle {
+            font-size: 20px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 2;
+            max-width: 500px;
+            margin: 0 auto;
+            letter-spacing: 2px;
+            transition: all 1s ease;
+        }
+        
+        body.morning-mode .subtitle {
+            color: rgba(255, 235, 200, 0.8);
+        }
+        
+        body.evening-mode .subtitle {
+            color: rgba(150, 150, 200, 0.6);
+        }
+        
+        /* 몽환한 시계 */
+        .clock-section {
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .clock-display {
+            width: 280px;
+            height: 280px;
+            margin: 0 auto 40px;
+            border-radius: 50%;
+            position: relative;
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(100, 150, 200, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(50, 80, 120, 0.2) 0%, transparent 50%);
+            box-shadow: 
+                0 0 60px rgba(100, 150, 200, 0.4),
+                inset 0 0 80px rgba(0, 0, 0, 0.6);
+            transition: all 2s ease;
+            animation: none;
+        }
+        
+        .clock-display.rotating {
+            animation: clockRotate 2s ease-in-out forwards;
+        }
+        
+        @keyframes clockRotate {
+            0% {
+                transform: rotate(0deg) scale(1);
+            }
+            50% {
+                transform: rotate(180deg) scale(1.1);
+            }
+            100% {
+                transform: rotate(360deg) scale(1);
+            }
+        }
+        
+        body.morning-mode .clock-display {
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(255, 200, 100, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(255, 150, 80, 0.3) 0%, transparent 50%);
+            box-shadow: 
+                0 0 80px rgba(255, 180, 100, 0.6),
+                inset 0 0 60px rgba(50, 40, 20, 0.4);
+        }
+        
+        body.evening-mode .clock-display {
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(40, 40, 80, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(20, 20, 50, 0.2) 0%, transparent 50%);
+            box-shadow: 
+                0 0 40px rgba(50, 50, 100, 0.5),
+                inset 0 0 80px rgba(0, 0, 0, 0.7);
+        }
+        
+        .clock-spiral {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: 
+                conic-gradient(
+                    from 0deg,
+                    rgba(100, 150, 200, 0) 0deg,
+                    rgba(100, 150, 200, 0.2) 90deg,
+                    rgba(100, 150, 200, 0.3) 180deg,
+                    rgba(100, 150, 200, 0.2) 270deg,
+                    rgba(100, 150, 200, 0) 360deg
+                );
+            transition: all 2s ease;
+        }
+        
+        body.morning-mode .clock-spiral {
+            background: 
+                conic-gradient(
+                    from 0deg,
+                    rgba(255, 200, 100, 0) 0deg,
+                    rgba(255, 200, 100, 0.3) 90deg,
+                    rgba(255, 200, 100, 0.4) 180deg,
+                    rgba(255, 200, 100, 0.3) 270deg,
+                    rgba(255, 200, 100, 0) 360deg
+                );
+        }
+        
+        body.evening-mode .clock-spiral {
+            background: 
+                conic-gradient(
+                    from 0deg,
+                    rgba(50, 50, 100, 0) 0deg,
+                    rgba(50, 50, 100, 0.2) 90deg,
+                    rgba(50, 50, 100, 0.3) 180deg,
+                    rgba(50, 50, 100, 0.2) 270deg,
+                    rgba(50, 50, 100, 0) 360deg
+                );
+        }
+        
+        .clock-numbers {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .clock-number {
+            position: absolute;
+            font-family: 'Georgia', serif;
+            font-size: 24px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.4);
+            transition: all 1s ease;
+        }
+        
+        body.morning-mode .clock-number {
+            color: rgba(255, 235, 200, 0.5);
+        }
+        
+        body.evening-mode .clock-number {
+            color: rgba(150, 150, 200, 0.4);
+        }
+        
+        .clock-number:nth-child(1) {
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .clock-number:nth-child(2) {
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .clock-number:nth-child(3) {
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .clock-number:nth-child(4) {
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .clock-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+            transition: all 1s ease;
+        }
+        
+        body.morning-mode .clock-center {
+            background: rgba(255, 235, 200, 0.6);
+            box-shadow: 0 0 30px rgba(255, 200, 100, 0.8);
+        }
+        
+        body.evening-mode .clock-center {
+            background: rgba(150, 150, 200, 0.5);
+            box-shadow: 0 0 20px rgba(100, 100, 150, 0.7);
+        }
+        
+        /* 선택 버튼 */
+        .choice-section {
+            display: flex;
+            gap: 80px;
+            justify-content: center;
+            margin-top: 70px;
+        }
+        
+        .choice-btn {
+            padding: 15px 35px;
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            background: rgba(30, 30, 40, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .choice-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .btn-morning {
+            border-color: rgba(255, 220, 150, 0.4);
+        }
+        
+        .btn-morning:hover {
+            background: rgba(255, 220, 150, 0.2);
+            border-color: rgba(255, 220, 150, 0.6);
+            box-shadow: 0 10px 40px rgba(255, 200, 100, 0.3);
+        }
+        
+        .btn-evening {
+            border-color: rgba(162, 155, 254, 0.4);
+        }
+        
+        .btn-evening:hover {
+            background: rgba(162, 155, 254, 0.2);
+            border-color: rgba(162, 155, 254, 0.6);
+            box-shadow: 0 10px 40px rgba(162, 155, 254, 0.3);
+        }
+        
+        /* 뒤로가기 방지 팝업 */
+        .back-prevention-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .back-prevention-modal.show {
+            display: flex;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .modal-content {
+            background: rgba(230, 230, 230, 0.75);
+            padding: 40px 50px;
+            border-radius: 6px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 18px;
+            color: #333;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            line-height: 1;
+        }
+        
+        .modal-text {
+            font-size: 18px;
+            color: #333;
+            letter-spacing: 1px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <!-- 배경음악 -->
+    <audio id="bgMusic" loop autoplay>
+        <source src="meditation-loop-30s.mp3" type="audio/mpeg">
+    </audio>
+    
+    <div class="butterfly-bg"></div>
+    
+    <!-- 뒤로가기 방지 팝업 -->
+    <div class="back-prevention-modal" id="backModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeModal">X</button>
+            <p class="modal-text">선택은 되돌릴 수 없습니다.</p>
+        </div>
+    </div>
+    
+    <!-- 나비 비디오 -->
+    <div class="butterfly-video-container" id="butterflyVideo">
+        <video autoplay loop muted playsinline preload="auto">
+            <source src="https://res.cloudinary.com/dshryrukz/video/upload/v1764535904/%EC%BB%B4%ED%8F%AC%EC%A7%80%EC%85%98_2_2_mreknd.webm" type="video/webm">
+        </video>
+    </div>
+    
+    
+    <div class="container">
+        <div class="screen-content">
+            <div class="center-title">
+                <h1 class="main-title">TIME</h1>
+                <div class="divider-line"></div>
+                <p class="subtitle">
+                    당신의 나비는 언제 날개짓을 시작할까요?
+                </p>
+            </div>
+            
+            <div class="clock-section">
+                <div class="clock-display">
+                    <div class="clock-spiral"></div>
+                    <div class="clock-numbers">
+                        <div class="clock-number">XII</div>
+                        <div class="clock-number">III</div>
+                        <div class="clock-number">VI</div>
+                        <div class="clock-number">IX</div>
+                    </div>
+                    <div class="clock-center"></div>
+                </div>
+            </div>
+            
+            <div class="choice-section">
+                <button class="choice-btn btn-morning" onclick="selectMorning()">아침에 출발</button>
+                <button class="choice-btn btn-evening" onclick="selectEvening()">저녁에 출발</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 뒤로가기 방지 강화
+        (function() {
+            history.pushState(null, null, location.href);
+            
+            window.addEventListener('popstate', function(event) {
+                history.pushState(null, null, location.href);
+                document.getElementById('backModal').classList.add('show');
+            });
+            
+            // 추가 방지
+            window.addEventListener('load', function() {
+                window.history.pushState(null, "", window.location.href);
+                window.onpopstate = function() {
+                    window.history.pushState(null, "", window.location.href);
+                    document.getElementById('backModal').classList.add('show');
+                };
+            });
+        })();
+        
+        document.getElementById('closeModal').addEventListener('click', function() {
+        
+        // 배경음악 재생
+        const bgMusic = document.getElementById('bgMusic');
+        bgMusic.volume = 0.6;
+        bgMusic.play().catch(err => console.log('Music play failed:', err));
+            document.getElementById('backModal').classList.remove('show');
+        });
+        
+        
+        // 새로고침 감지 - HOME으로 리다이렉트
+        window.addEventListener('beforeunload', function() {
+            if (performance.navigation.type === 1) {
+                localStorage.clear();
+            }
+        });
+        
+        // 나비 비디오 seamless loop
+        const butterflyVideoElement = document.querySelector('#butterflyVideo video');
+        
+        // 비디오 끝나면 즉시 다시 시작
+        butterflyVideoElement.addEventListener('ended', function() {
+            this.currentTime = 0;
+            this.play();
+        });
+        
+        // 추가 안전장치: 시간 체크
+        butterflyVideoElement.addEventListener('timeupdate', function() {
+            if (this.duration > 0 && this.currentTime >= this.duration - 0.1) {
+                this.currentTime = 0;
+            }
+        });
+        
+        let isChoiceSelected = false;
+        
+        function selectMorning() {
+            if (isChoiceSelected) return;
+            isChoiceSelected = true;
+            
+            // localStorage에 선택 저장
+            localStorage.setItem('choice1', 'morning');
+            localStorage.setItem('wing_color', '#FFD700'); // 노란색 글로우
+            localStorage.setItem('colors', JSON.stringify(['#FFD700'])); // 호환성 유지
+            
+            // 버튼 비활성화
+            document.querySelectorAll('.choice-btn').forEach(btn => {
+                btn.style.pointerEvents = 'none';
+                btn.style.opacity = '0.5';
+            });
+            
+            const clock = document.querySelector('.clock-display');
+            const butterfly = document.getElementById('butterflyVideo');
+            
+            // 시계 회전
+            clock.classList.add('rotating');
+            
+            // 나비 나선 애니메이션
+            butterfly.classList.add('spiraling');
+            
+            setTimeout(() => {
+                document.body.classList.remove('evening-mode');
+                document.body.classList.add('morning-mode');
+                
+                setTimeout(() => {
+                    clock.classList.remove('rotating');
+                }, 100);
+                
+                // Choice 2로 이동
+                setTimeout(() => {
+                    window.location.href = 'choice2.html';
+                }, 500);
+            }, 2000);
+        }
+        
+        function selectEvening() {
+            if (isChoiceSelected) return;
+            isChoiceSelected = true;
+            
+            // localStorage에 선택 저장
+            localStorage.setItem('choice1', 'evening');
+            localStorage.setItem('wing_color', '#4DD0D0'); // 청록색 글로우
+            localStorage.setItem('colors', JSON.stringify(['#4DD0D0'])); // 호환성 유지
+            
+            // 버튼 비활성화
+            document.querySelectorAll('.choice-btn').forEach(btn => {
+                btn.style.pointerEvents = 'none';
+                btn.style.opacity = '0.5';
+            });
+            
+            const clock = document.querySelector('.clock-display');
+            const butterfly = document.getElementById('butterflyVideo');
+            
+            // 나비 색상 설정 (저녁 - 핑크)
+            butterfly.classList.add('evening-butterfly');
+            
+            // 시계 회전
+            clock.classList.add('rotating');
+            
+            // 나비 나선 애니메이션
+            butterfly.classList.add('spiraling');
+            
+            setTimeout(() => {
+                document.body.classList.remove('morning-mode');
+                document.body.classList.add('evening-mode');
+                
+                setTimeout(() => {
+                    clock.classList.remove('rotating');
+                }, 100);
+                
+                // Choice 2로 이동
+                setTimeout(() => {
+                    window.location.href = 'choice2.html';
+                }, 500);
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
